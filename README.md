@@ -1,8 +1,11 @@
 # what_I_Learned
-place for reviewing what I learned
+*place for reviewing what I learned*
 
 This place is for reviewing and organize what I learned.
 
+It might include some projects during learning.
+
 I will add something later on.
 
-This README has been contributed in my local computer
+## What is in here
+
