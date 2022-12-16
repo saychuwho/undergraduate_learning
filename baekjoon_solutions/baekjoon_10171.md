@@ -1,0 +1,14 @@
+# baekjoon_10171
+
+## C++ Solution
+
+```c++
+#include <iostream>
+
+int main() {
+    std::cout << "\\    /\\" << std::endl;
+    std::cout << " )  ( \')" << std::endl;
+    std::cout << "(  /  )" << std::endl;
+    std::cout << " \\(__)|" << std::endl;
+}
+```

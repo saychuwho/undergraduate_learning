@@ -17,4 +17,5 @@ I will add something later on.
 ### Baekjoon solutions
 
 - How I solved baekjoon online judge problems
-- Including Problem, Idea and code
+- Solution is mostly written in C++, sometimes Python
+- All codes are passed judge system.
