@@ -1,6 +1,6 @@
 # what_I_Learned
 
-*place for reviewing what I learned*
+place for reviewing what I learned
 
 This place is for reviewing and organize what I learned.
 
@@ -19,3 +19,4 @@ I will add something later on.
 - How I solved baekjoon online judge problems
 - Solution is mostly written in C++, sometimes Python
 - All codes are passed judge system.
+- All C++ code's version is C++14
