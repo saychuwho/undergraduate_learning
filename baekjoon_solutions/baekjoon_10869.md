@@ -23,3 +23,21 @@ int main() {
     std::cout << a % b << std::endl;
 }
 ```
+
+## C# Solution
+```c#
+using System;
+
+class HelloWorld
+{
+    static void Main(string[] args)
+    {
+        string[] getnum = Console.ReadLine().Split();
+        Console.WriteLine(int.Parse(getnum[0]) + int.Parse(getnum[1]));
+        Console.WriteLine(int.Parse(getnum[0]) - int.Parse(getnum[1]));
+        Console.WriteLine(int.Parse(getnum[0]) * int.Parse(getnum[1]));
+        Console.WriteLine(int.Parse(getnum[0]) / int.Parse(getnum[1]));
+        Console.WriteLine(int.Parse(getnum[0]) % int.Parse(getnum[1]));
+    }
+}
+```

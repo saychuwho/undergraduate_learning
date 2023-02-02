@@ -22,3 +22,26 @@ int main() {
     std::cout << result_hour << " " << result_minute;
 }
 ```
+
+## C# Solution
+
+```c#
+using System;
+
+class HelloWorld
+{
+    static void Main(string[] args)
+    {
+        int[] start_time = Array.ConvertAll(Console.ReadLine().Split(' '), int.Parse);
+        int cooking_time = int.Parse(Console.ReadLine());
+        int end_hour = 0, end_minute = 0;
+        end_hour = start_time[0] + (cooking_time / 60) + ((start_time[1] + (cooking_time % 60)) / 60);
+        if (end_hour >= 24)
+        {
+            end_hour -= 24;
+        }
+        end_minute = (start_time[1] + (cooking_time % 60)) % 60;
+        Console.WriteLine($"{end_hour} {end_minute}");
+    }
+}
+```

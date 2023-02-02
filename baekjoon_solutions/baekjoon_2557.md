@@ -18,3 +18,19 @@ int main(){
     std::cout<<"Hello World!";
 }
 ```
+
+## C# solution
+
+```c#
+using System;
+
+
+class HelloWorld
+{
+    static void Main(string[] args)
+    {
+            Console.WriteLine("Hello World!");
+    }
+}
+
+```

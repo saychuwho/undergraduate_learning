@@ -26,3 +26,21 @@ int main() {
     std::cout << ((a % c) * (b % c)) % c << std::endl;
 }
 ```
+
+## C# Solution
+
+```c#
+using System;
+
+class HelloWorld
+{
+    static void Main(string[] args)
+    {
+        int[] getnum = Array.ConvertAll(Console.ReadLine().Split(), int.Parse);
+        Console.WriteLine((getnum[0] + getnum[1]) % getnum[2]);
+        Console.WriteLine( ((getnum[0] % getnum[2]) + (getnum[1] % getnum[2])) % getnum[2] );
+        Console.WriteLine((getnum[0]*getnum[1]) % getnum[2]);
+        Console.WriteLine(((getnum[0] % getnum[2]) * (getnum[1] % getnum[2])) % getnum[2]);
+    }
+}
+```

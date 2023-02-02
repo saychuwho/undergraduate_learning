@@ -18,3 +18,25 @@ int main() {
     std::cout << a * b << std::endl;
 }
 ```
+
+## C# Solution
+
+```c#
+using System;
+
+class HelloWorld
+{
+    static void Main(string[] args)
+    {
+        int a = int.Parse(Console.ReadLine());
+        int b = int.Parse(Console.ReadLine());
+        int b_100 = b / 100;
+        int b_10 = (b % 100) / 10;
+        int b_1 = b % 10;
+        Console.WriteLine(a * b_1);
+        Console.WriteLine(a * b_10);
+        Console.WriteLine(a * b_100);
+        Console.WriteLine(a * b);
+    }
+}
+```

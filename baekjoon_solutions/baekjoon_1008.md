@@ -29,3 +29,18 @@ int main() {
 a, b = map(int, input().split(" "))
 print(a/b)
 ```
+
+## C# Solution
+
+```c#
+using System;
+
+class HelloWorld
+{
+    static void Main(string[] args)
+    {
+        string[] getnum = Console.ReadLine().Split();
+        Console.WriteLine(Double.Parse(getnum[0]) / Double.Parse(getnum[1]));
+    }
+}
+```

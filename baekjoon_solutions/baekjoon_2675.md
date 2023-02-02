@@ -33,3 +33,30 @@ int main() {
 	}
 }
 ```
+
+## C# Solution
+
+```c#
+using System;
+
+class HelloWorld
+{
+    static void Main(string[] args)
+    {
+        int n = int.Parse(Console.ReadLine());
+        for(int i = 0; i < n; i++)
+        {
+            string[] get_info = Console.ReadLine().Split(' ');
+            string result_str = "";
+            for(int j=0; j < get_info[1].Length; j++)
+            {
+                for(int k=0; k < int.Parse(get_info[0]); k++)
+                {
+                    result_str += get_info[1][j];
+                }
+            }
+            Console.WriteLine(result_str);
+        }
+    }
+}
+```
