@@ -36,3 +36,35 @@ int main() {
     std::cout << prise;
 }
 ```
+
+## C# Solution
+```c#
+using System;
+
+class HelloWorld
+{
+    static void Main(string[] args)
+    {
+        int score = 0;
+        int[] dice_num = Array.ConvertAll(Console.ReadLine().Split(' '), int.Parse);
+        Array.Sort(dice_num);
+        if(dice_num[2] == dice_num[1] && dice_num[2] == dice_num[0])
+        {
+            score = 10000 + dice_num[2] * 1000;
+        }
+        else if(dice_num[2] == dice_num[1] || dice_num[2] == dice_num[0])
+        {
+            score = 1000 + dice_num[2] * 100;
+        }
+        else if (dice_num[0] == dice_num[1])
+        {
+            score = 1000 + dice_num[1] * 100;
+        }
+        else
+        {
+            score = dice_num[2] * 100;
+        }
+        Console.WriteLine(score);
+    }
+}
+```
