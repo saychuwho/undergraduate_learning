@@ -1,0 +1,3831 @@
+0x400030 progEndAddr
+
+--Pipeline Stages--
+0x0:0
+0x0:0
+0x0:0
+0x0:0
+0x0:0
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x0 idex stall
+
+
+--PC state--
+0x0 jumpAddr
+0x400000 Reg.PC
+
+
+5 isEndcounter
+
+
+12 textSize
+0 instrCounter
+1 debugCounter
+
+
+--Pipeline Stages--
+0x400000:1
+0x0:0
+0x0:0
+0x0:0
+0x0:0
+
+
+--IF stage--
+0x400000
+15 op decimal
+0xf op hex
+0 rs
+8 rt
+0 rd
+4096 imm
+0x0 funct hex
+
+
+--Hazard--
+0 0x400000 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x0 idex stall
+
+
+--PC state--
+0x0 jumpAddr
+0x400004 Reg.PC
+
+===== Cycle 1 =====
+Current pipeline PC state:
+{0x400000||||}
+
+
+5 isEndcounter
+
+
+12 textSize
+0 instrCounter
+2 debugCounter
+
+
+--Pipeline Stages--
+0x400004:1
+0x400000:2
+0x0:0
+0x0:0
+0x0:0
+
+
+--IF stage--
+0x400004
+35 op decimal
+0x23 op hex
+8 rs
+9 rt
+0 rd
+0 imm
+0x0 funct hex
+
+
+--ID stage--
+0x400000
+0 MemWrite
+0 MemRead
+1 RegWrite
+2 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+0 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400004 stPC stall
+0 0x400000 ifid stall
+0 0x400000 ifid flush
+0 0x0 idex stall
+
+
+--PC state--
+0x0 jumpAddr
+0x400008 Reg.PC
+
+===== Cycle 2 =====
+Current pipeline PC state:
+{0x400004|0x400000|||}
+
+
+5 isEndcounter
+
+
+12 textSize
+0 instrCounter
+3 debugCounter
+
+
+--Pipeline Stages--
+0x400008:1
+0x400004:2
+0x400000:3
+0x0:0
+0x0:0
+
+
+--IF stage--
+0x400008
+0 op decimal
+0x0 op hex
+0 rs
+9 rt
+2 rd
+0 imm
+0x21 funct hex
+
+
+--ID stage--
+0x400004
+0 MemWrite
+1 MemRead
+1 RegWrite
+0 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+1 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+0 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400008 stPC stall
+0 0x400004 ifid stall
+0 0x400004 ifid flush
+0 0x400000 idex stall
+
+
+--EX stage--
+0x400000
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+4096 ALUdata1
+16 ALUdata2
+268435456 aluResult
+
+
+--PC state--
+0x0 jumpAddr
+0x40000c Reg.PC
+
+===== Cycle 3 =====
+Current pipeline PC state:
+{0x400008|0x400004|0x400000||}
+
+
+5 isEndcounter
+
+
+12 textSize
+0 instrCounter
+4 debugCounter
+
+
+--Pipeline Stages--
+0x40000c:1
+0x400008:2
+0x400004:3
+0x400000:4
+0x0:0
+
+
+--IF stage--
+0x40000c
+3 op decimal
+0x3 op hex
+0 rs
+0 rt
+0 rd
+1048581 imm
+0x0 funct hex
+
+
+--ID stage--
+0x400008
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+0 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+1 0x40000c stPC stall
+0 0x400008 ifid stall
+0 0x400008 ifid flush
+1 0x400004 idex stall
+
+
+--EX stage--
+0x400004
+1 rsForwarding
+0 rtForwarding
+268435456 tmpData1
+0 tmpData2
+268435456 ALUdata1
+0 ALUdata2
+268435456 aluResult
+
+
+--MEM stage--
+0x400000
+0 rsForwarding
+0 rtForwarding
+268435456 aluResult(value)
+0x10000000 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400010 Reg.PC
+
+===== Cycle 4 =====
+Current pipeline PC state:
+{0x40000c|0x400008|0x400004|0x400000|}
+
+
+5 isEndcounter
+
+
+12 textSize
+0 instrCounter
+5 debugCounter
+
+
+--Pipeline Stages--
+0x40000c:1
+0x400008:2
+0x0:0
+0x400004:4
+0x400000:5
+
+
+--IF stage--
+0x40000c
+3 op decimal
+0x3 op hex
+0 rs
+0 rt
+0 rd
+1048581 imm
+0x0 funct hex
+
+--WB stage--
+0x400000
+0x8 0x10000000
+
+--ID stage--
+0x400008
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+0 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+1 0x40000c stPC stall
+0 0x400008 ifid stall
+0 0x400008 ifid flush
+0 0x0 idex stall
+
+
+--MEM stage--
+0x400004
+1 rsForwarding
+0 rtForwarding
+268435456 aluResult(value)
+0x10000000 aluResult(addr)
+5 memData : decimal
+0x5 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400010 Reg.PC
+
+===== Cycle 5 =====
+Current pipeline PC state:
+{0x40000c|0x400008||0x400004|0x400000}
+
+
+5 isEndcounter
+
+
+12 textSize
+1 instrCounter
+6 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x40000c:2
+0x400008:3
+0x0:0
+0x400004:5
+
+--WB stage--
+0x400004
+0x9 0x5
+
+--ID stage--
+0x40000c
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+1 Branch
+0 regData1
+0 regData2
+0x400014 jumpAddr hex
+4194324 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x40000c ifid stall
+0 0x40000c ifid flush
+0 0x400008 idex stall
+
+
+--EX stage--
+0x400008
+0 rsForwarding
+2 rtForwarding
+0 tmpData1
+5 tmpData2
+0 ALUdata1
+5 ALUdata2
+5 aluResult
+
+
+--PC state--
+0x400014 jumpAddr
+0x400014 Reg.PC
+
+===== Cycle 6 =====
+Current pipeline PC state:
+{|0x40000c|0x400008||0x400004}
+
+
+5 isEndcounter
+
+
+12 textSize
+2 instrCounter
+7 debugCounter
+
+
+--Pipeline Stages--
+0x400014:1
+0x0:0
+0x40000c:3
+0x400008:4
+0x0:0
+
+
+--IF stage--
+0x400014
+11 op decimal
+0xb op hex
+2 rs
+1 rt
+0 rd
+1 imm
+0x0 funct hex
+
+
+--Hazard--
+0 0x400014 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x40000c idex stall
+
+
+--EX stage--
+0x40000c
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+4194320 ALUdata2
+4194320 aluResult
+
+
+--MEM stage--
+0x400008
+0 rsForwarding
+0 rtForwarding
+5 aluResult(value)
+0x5 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400018 Reg.PC
+
+===== Cycle 7 =====
+Current pipeline PC state:
+{0x400014||0x40000c|0x400008|}
+
+
+5 isEndcounter
+
+
+12 textSize
+2 instrCounter
+8 debugCounter
+
+
+--Pipeline Stages--
+0x400018:1
+0x400014:2
+0x0:0
+0x40000c:4
+0x400008:5
+
+
+--IF stage--
+0x400018
+5 op decimal
+0x5 op hex
+1 rs
+0 rt
+0 rd
+3 imm
+0x0 funct hex
+
+--WB stage--
+0x400008
+0x2 0x5
+
+--ID stage--
+0x400014
+0 MemWrite
+0 MemRead
+1 RegWrite
+4 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+0 Branch
+5 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400018 stPC stall
+0 0x400014 ifid stall
+0 0x400014 ifid flush
+0 0x0 idex stall
+
+
+--MEM stage--
+0x40000c
+0 rsForwarding
+0 rtForwarding
+4194320 aluResult(value)
+0x400010 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x40001c Reg.PC
+
+===== Cycle 8 =====
+Current pipeline PC state:
+{0x400018|0x400014||0x40000c|0x400008}
+
+
+5 isEndcounter
+
+
+12 textSize
+3 instrCounter
+9 debugCounter
+
+
+--Pipeline Stages--
+0x40001c:1
+0x400018:2
+0x400014:3
+0x0:0
+0x40000c:5
+
+
+--IF stage--
+0x40001c
+0 op decimal
+0x0 op hex
+3 rs
+2 rt
+3 rd
+0 imm
+0x21 funct hex
+
+--WB stage--
+0x40000c
+0x1f 0x400010
+
+--ID stage--
+0x400018
+0 MemWrite
+0 MemRead
+0 RegWrite
+1 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+2 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x40001c stPC stall
+0 0x400018 ifid stall
+0 0x400018 ifid flush
+0 0x400014 idex stall
+
+
+--EX stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+5 tmpData1
+0 tmpData2
+5 ALUdata1
+1 ALUdata2
+0 aluResult
+
+
+--PC state--
+0x0 jumpAddr
+0x400020 Reg.PC
+
+===== Cycle 9 =====
+Current pipeline PC state:
+{0x40001c|0x400018|0x400014||0x40000c}
+
+
+5 isEndcounter
+
+
+12 textSize
+4 instrCounter
+10 debugCounter
+
+
+--Pipeline Stages--
+0x400020:1
+0x40001c:2
+0x400018:3
+0x400014:4
+0x0:0
+
+
+--IF stage--
+0x400020
+9 op decimal
+0x9 op hex
+2 rs
+2 rt
+0 rd
+65535 imm
+0x0 funct hex
+
+
+--ID stage--
+0x40001c
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+0 Branch
+0 regData1
+5 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400020 stPC stall
+0 0x40001c ifid stall
+0 0x40001c ifid flush
+0 0x400018 idex stall
+
+
+--EX stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400024 Reg.PC
+
+===== Cycle 10 =====
+Current pipeline PC state:
+{0x400020|0x40001c|0x400018|0x400014|}
+
+
+5 isEndcounter
+
+
+12 textSize
+4 instrCounter
+11 debugCounter
+
+
+--Pipeline Stages--
+0x400024:1
+0x400020:2
+0x40001c:3
+0x400018:4
+0x400014:5
+
+
+--IF stage--
+0x400024
+2 op decimal
+0x2 op hex
+0 rs
+0 rt
+0 rd
+1048581 imm
+0x0 funct hex
+
+--WB stage--
+0x400014
+0x1 0x0
+
+--ID stage--
+0x400020
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+1 isSignExtend
+0 Branch
+5 regData1
+5 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+1 0x400024 stPC stall
+0 0x400020 ifid stall
+0 0x400020 ifid flush
+0 0x40001c idex stall
+
+
+--EX stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+5 tmpData2
+0 ALUdata1
+5 ALUdata2
+5 aluResult
+
+
+--MEM stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400028 Reg.PC
+
+===== Cycle 11 =====
+Current pipeline PC state:
+{0x400024|0x400020|0x40001c|0x400018|0x400014}
+
+
+5 isEndcounter
+
+
+12 textSize
+5 instrCounter
+12 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x400024:2
+0x400020:3
+0x40001c:4
+0x400018:5
+
+
+--ID stage--
+0x400024
+0 MemWrite
+0 MemRead
+0 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+1 Branch
+0 regData1
+0 regData2
+0x400014 jumpAddr hex
+4194324 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x400024 ifid stall
+0 0x400024 ifid flush
+0 0x400020 idex stall
+
+
+--EX stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+5 tmpData1
+5 tmpData2
+5 ALUdata1
+-1 ALUdata2
+4 aluResult
+
+
+--MEM stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+5 aluResult(value)
+0x5 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+5 regData2 : decimal
+0x5 regData2 : hex
+0x400014 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x400014 jumpAddr
+0x400014 Reg.PC
+
+===== Cycle 12 =====
+Current pipeline PC state:
+{|0x400024|0x400020|0x40001c|0x400018}
+
+
+5 isEndcounter
+
+
+12 textSize
+6 instrCounter
+13 debugCounter
+
+
+--Pipeline Stages--
+0x400014:1
+0x0:0
+0x400024:3
+0x400020:4
+0x40001c:5
+
+
+--IF stage--
+0x400014
+11 op decimal
+0xb op hex
+2 rs
+1 rt
+0 rd
+1 imm
+0x0 funct hex
+
+--WB stage--
+0x40001c
+0x3 0x5
+
+--Hazard--
+0 0x400014 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x400024 idex stall
+
+
+--EX stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+4 aluResult(value)
+0x4 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+5 regData2 : decimal
+0x5 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400018 Reg.PC
+
+===== Cycle 13 =====
+Current pipeline PC state:
+{0x400014||0x400024|0x400020|0x40001c}
+
+
+5 isEndcounter
+
+
+12 textSize
+7 instrCounter
+14 debugCounter
+
+
+--Pipeline Stages--
+0x400018:1
+0x400014:2
+0x0:0
+0x400024:4
+0x400020:5
+
+
+--IF stage--
+0x400018
+5 op decimal
+0x5 op hex
+1 rs
+0 rt
+0 rd
+3 imm
+0x0 funct hex
+
+--WB stage--
+0x400020
+0x2 0x4
+
+--ID stage--
+0x400014
+0 MemWrite
+0 MemRead
+1 RegWrite
+4 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+0 Branch
+4 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400018 stPC stall
+0 0x400014 ifid stall
+0 0x400014 ifid flush
+0 0x0 idex stall
+
+
+--MEM stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x40001c Reg.PC
+
+===== Cycle 14 =====
+Current pipeline PC state:
+{0x400018|0x400014||0x400024|0x400020}
+
+
+5 isEndcounter
+
+
+12 textSize
+8 instrCounter
+15 debugCounter
+
+
+--Pipeline Stages--
+0x40001c:1
+0x400018:2
+0x400014:3
+0x0:0
+0x400024:5
+
+
+--IF stage--
+0x40001c
+0 op decimal
+0x0 op hex
+3 rs
+2 rt
+3 rd
+0 imm
+0x21 funct hex
+
+
+--ID stage--
+0x400018
+0 MemWrite
+0 MemRead
+0 RegWrite
+1 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+2 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x40001c stPC stall
+0 0x400018 ifid stall
+0 0x400018 ifid flush
+0 0x400014 idex stall
+
+
+--EX stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+4 tmpData1
+0 tmpData2
+4 ALUdata1
+1 ALUdata2
+0 aluResult
+
+
+--PC state--
+0x0 jumpAddr
+0x400020 Reg.PC
+
+===== Cycle 15 =====
+Current pipeline PC state:
+{0x40001c|0x400018|0x400014||0x400024}
+
+
+5 isEndcounter
+
+
+12 textSize
+9 instrCounter
+16 debugCounter
+
+
+--Pipeline Stages--
+0x400020:1
+0x40001c:2
+0x400018:3
+0x400014:4
+0x0:0
+
+
+--IF stage--
+0x400020
+9 op decimal
+0x9 op hex
+2 rs
+2 rt
+0 rd
+65535 imm
+0x0 funct hex
+
+
+--ID stage--
+0x40001c
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+0 Branch
+5 regData1
+4 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400020 stPC stall
+0 0x40001c ifid stall
+0 0x40001c ifid flush
+0 0x400018 idex stall
+
+
+--EX stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400024 Reg.PC
+
+===== Cycle 16 =====
+Current pipeline PC state:
+{0x400020|0x40001c|0x400018|0x400014|}
+
+
+5 isEndcounter
+
+
+12 textSize
+9 instrCounter
+17 debugCounter
+
+
+--Pipeline Stages--
+0x400024:1
+0x400020:2
+0x40001c:3
+0x400018:4
+0x400014:5
+
+
+--IF stage--
+0x400024
+2 op decimal
+0x2 op hex
+0 rs
+0 rt
+0 rd
+1048581 imm
+0x0 funct hex
+
+--WB stage--
+0x400014
+0x1 0x0
+
+--ID stage--
+0x400020
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+1 isSignExtend
+0 Branch
+4 regData1
+4 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+1 0x400024 stPC stall
+0 0x400020 ifid stall
+0 0x400020 ifid flush
+0 0x40001c idex stall
+
+
+--EX stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+5 tmpData1
+4 tmpData2
+5 ALUdata1
+4 ALUdata2
+9 aluResult
+
+
+--MEM stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400028 Reg.PC
+
+===== Cycle 17 =====
+Current pipeline PC state:
+{0x400024|0x400020|0x40001c|0x400018|0x400014}
+
+
+5 isEndcounter
+
+
+12 textSize
+10 instrCounter
+18 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x400024:2
+0x400020:3
+0x40001c:4
+0x400018:5
+
+
+--ID stage--
+0x400024
+0 MemWrite
+0 MemRead
+0 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+1 Branch
+0 regData1
+0 regData2
+0x400014 jumpAddr hex
+4194324 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x400024 ifid stall
+0 0x400024 ifid flush
+0 0x400020 idex stall
+
+
+--EX stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+4 tmpData1
+4 tmpData2
+4 ALUdata1
+-1 ALUdata2
+3 aluResult
+
+
+--MEM stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+9 aluResult(value)
+0x9 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+4 regData2 : decimal
+0x4 regData2 : hex
+0x400014 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x400014 jumpAddr
+0x400014 Reg.PC
+
+===== Cycle 18 =====
+Current pipeline PC state:
+{|0x400024|0x400020|0x40001c|0x400018}
+
+
+5 isEndcounter
+
+
+12 textSize
+11 instrCounter
+19 debugCounter
+
+
+--Pipeline Stages--
+0x400014:1
+0x0:0
+0x400024:3
+0x400020:4
+0x40001c:5
+
+
+--IF stage--
+0x400014
+11 op decimal
+0xb op hex
+2 rs
+1 rt
+0 rd
+1 imm
+0x0 funct hex
+
+--WB stage--
+0x40001c
+0x3 0x9
+
+--Hazard--
+0 0x400014 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x400024 idex stall
+
+
+--EX stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+3 aluResult(value)
+0x3 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+4 regData2 : decimal
+0x4 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400018 Reg.PC
+
+===== Cycle 19 =====
+Current pipeline PC state:
+{0x400014||0x400024|0x400020|0x40001c}
+
+
+5 isEndcounter
+
+
+12 textSize
+12 instrCounter
+20 debugCounter
+
+
+--Pipeline Stages--
+0x400018:1
+0x400014:2
+0x0:0
+0x400024:4
+0x400020:5
+
+
+--IF stage--
+0x400018
+5 op decimal
+0x5 op hex
+1 rs
+0 rt
+0 rd
+3 imm
+0x0 funct hex
+
+--WB stage--
+0x400020
+0x2 0x3
+
+--ID stage--
+0x400014
+0 MemWrite
+0 MemRead
+1 RegWrite
+4 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+0 Branch
+3 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400018 stPC stall
+0 0x400014 ifid stall
+0 0x400014 ifid flush
+0 0x0 idex stall
+
+
+--MEM stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x40001c Reg.PC
+
+===== Cycle 20 =====
+Current pipeline PC state:
+{0x400018|0x400014||0x400024|0x400020}
+
+
+5 isEndcounter
+
+
+12 textSize
+13 instrCounter
+21 debugCounter
+
+
+--Pipeline Stages--
+0x40001c:1
+0x400018:2
+0x400014:3
+0x0:0
+0x400024:5
+
+
+--IF stage--
+0x40001c
+0 op decimal
+0x0 op hex
+3 rs
+2 rt
+3 rd
+0 imm
+0x21 funct hex
+
+
+--ID stage--
+0x400018
+0 MemWrite
+0 MemRead
+0 RegWrite
+1 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+2 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x40001c stPC stall
+0 0x400018 ifid stall
+0 0x400018 ifid flush
+0 0x400014 idex stall
+
+
+--EX stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+3 tmpData1
+0 tmpData2
+3 ALUdata1
+1 ALUdata2
+0 aluResult
+
+
+--PC state--
+0x0 jumpAddr
+0x400020 Reg.PC
+
+===== Cycle 21 =====
+Current pipeline PC state:
+{0x40001c|0x400018|0x400014||0x400024}
+
+
+5 isEndcounter
+
+
+12 textSize
+14 instrCounter
+22 debugCounter
+
+
+--Pipeline Stages--
+0x400020:1
+0x40001c:2
+0x400018:3
+0x400014:4
+0x0:0
+
+
+--IF stage--
+0x400020
+9 op decimal
+0x9 op hex
+2 rs
+2 rt
+0 rd
+65535 imm
+0x0 funct hex
+
+
+--ID stage--
+0x40001c
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+0 Branch
+9 regData1
+3 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400020 stPC stall
+0 0x40001c ifid stall
+0 0x40001c ifid flush
+0 0x400018 idex stall
+
+
+--EX stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400024 Reg.PC
+
+===== Cycle 22 =====
+Current pipeline PC state:
+{0x400020|0x40001c|0x400018|0x400014|}
+
+
+5 isEndcounter
+
+
+12 textSize
+14 instrCounter
+23 debugCounter
+
+
+--Pipeline Stages--
+0x400024:1
+0x400020:2
+0x40001c:3
+0x400018:4
+0x400014:5
+
+
+--IF stage--
+0x400024
+2 op decimal
+0x2 op hex
+0 rs
+0 rt
+0 rd
+1048581 imm
+0x0 funct hex
+
+--WB stage--
+0x400014
+0x1 0x0
+
+--ID stage--
+0x400020
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+1 isSignExtend
+0 Branch
+3 regData1
+3 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+1 0x400024 stPC stall
+0 0x400020 ifid stall
+0 0x400020 ifid flush
+0 0x40001c idex stall
+
+
+--EX stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+9 tmpData1
+3 tmpData2
+9 ALUdata1
+3 ALUdata2
+12 aluResult
+
+
+--MEM stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400028 Reg.PC
+
+===== Cycle 23 =====
+Current pipeline PC state:
+{0x400024|0x400020|0x40001c|0x400018|0x400014}
+
+
+5 isEndcounter
+
+
+12 textSize
+15 instrCounter
+24 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x400024:2
+0x400020:3
+0x40001c:4
+0x400018:5
+
+
+--ID stage--
+0x400024
+0 MemWrite
+0 MemRead
+0 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+1 Branch
+0 regData1
+0 regData2
+0x400014 jumpAddr hex
+4194324 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x400024 ifid stall
+0 0x400024 ifid flush
+0 0x400020 idex stall
+
+
+--EX stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+3 tmpData1
+3 tmpData2
+3 ALUdata1
+-1 ALUdata2
+2 aluResult
+
+
+--MEM stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+12 aluResult(value)
+0xc aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+3 regData2 : decimal
+0x3 regData2 : hex
+0x400014 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x400014 jumpAddr
+0x400014 Reg.PC
+
+===== Cycle 24 =====
+Current pipeline PC state:
+{|0x400024|0x400020|0x40001c|0x400018}
+
+
+5 isEndcounter
+
+
+12 textSize
+16 instrCounter
+25 debugCounter
+
+
+--Pipeline Stages--
+0x400014:1
+0x0:0
+0x400024:3
+0x400020:4
+0x40001c:5
+
+
+--IF stage--
+0x400014
+11 op decimal
+0xb op hex
+2 rs
+1 rt
+0 rd
+1 imm
+0x0 funct hex
+
+--WB stage--
+0x40001c
+0x3 0xc
+
+--Hazard--
+0 0x400014 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x400024 idex stall
+
+
+--EX stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+2 aluResult(value)
+0x2 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+3 regData2 : decimal
+0x3 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400018 Reg.PC
+
+===== Cycle 25 =====
+Current pipeline PC state:
+{0x400014||0x400024|0x400020|0x40001c}
+
+
+5 isEndcounter
+
+
+12 textSize
+17 instrCounter
+26 debugCounter
+
+
+--Pipeline Stages--
+0x400018:1
+0x400014:2
+0x0:0
+0x400024:4
+0x400020:5
+
+
+--IF stage--
+0x400018
+5 op decimal
+0x5 op hex
+1 rs
+0 rt
+0 rd
+3 imm
+0x0 funct hex
+
+--WB stage--
+0x400020
+0x2 0x2
+
+--ID stage--
+0x400014
+0 MemWrite
+0 MemRead
+1 RegWrite
+4 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+0 Branch
+2 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400018 stPC stall
+0 0x400014 ifid stall
+0 0x400014 ifid flush
+0 0x0 idex stall
+
+
+--MEM stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x40001c Reg.PC
+
+===== Cycle 26 =====
+Current pipeline PC state:
+{0x400018|0x400014||0x400024|0x400020}
+
+
+5 isEndcounter
+
+
+12 textSize
+18 instrCounter
+27 debugCounter
+
+
+--Pipeline Stages--
+0x40001c:1
+0x400018:2
+0x400014:3
+0x0:0
+0x400024:5
+
+
+--IF stage--
+0x40001c
+0 op decimal
+0x0 op hex
+3 rs
+2 rt
+3 rd
+0 imm
+0x21 funct hex
+
+
+--ID stage--
+0x400018
+0 MemWrite
+0 MemRead
+0 RegWrite
+1 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+2 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x40001c stPC stall
+0 0x400018 ifid stall
+0 0x400018 ifid flush
+0 0x400014 idex stall
+
+
+--EX stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+2 tmpData1
+0 tmpData2
+2 ALUdata1
+1 ALUdata2
+0 aluResult
+
+
+--PC state--
+0x0 jumpAddr
+0x400020 Reg.PC
+
+===== Cycle 27 =====
+Current pipeline PC state:
+{0x40001c|0x400018|0x400014||0x400024}
+
+
+5 isEndcounter
+
+
+12 textSize
+19 instrCounter
+28 debugCounter
+
+
+--Pipeline Stages--
+0x400020:1
+0x40001c:2
+0x400018:3
+0x400014:4
+0x0:0
+
+
+--IF stage--
+0x400020
+9 op decimal
+0x9 op hex
+2 rs
+2 rt
+0 rd
+65535 imm
+0x0 funct hex
+
+
+--ID stage--
+0x40001c
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+0 Branch
+12 regData1
+2 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400020 stPC stall
+0 0x40001c ifid stall
+0 0x40001c ifid flush
+0 0x400018 idex stall
+
+
+--EX stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400024 Reg.PC
+
+===== Cycle 28 =====
+Current pipeline PC state:
+{0x400020|0x40001c|0x400018|0x400014|}
+
+
+5 isEndcounter
+
+
+12 textSize
+19 instrCounter
+29 debugCounter
+
+
+--Pipeline Stages--
+0x400024:1
+0x400020:2
+0x40001c:3
+0x400018:4
+0x400014:5
+
+
+--IF stage--
+0x400024
+2 op decimal
+0x2 op hex
+0 rs
+0 rt
+0 rd
+1048581 imm
+0x0 funct hex
+
+--WB stage--
+0x400014
+0x1 0x0
+
+--ID stage--
+0x400020
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+1 isSignExtend
+0 Branch
+2 regData1
+2 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+1 0x400024 stPC stall
+0 0x400020 ifid stall
+0 0x400020 ifid flush
+0 0x40001c idex stall
+
+
+--EX stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+12 tmpData1
+2 tmpData2
+12 ALUdata1
+2 ALUdata2
+14 aluResult
+
+
+--MEM stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400028 Reg.PC
+
+===== Cycle 29 =====
+Current pipeline PC state:
+{0x400024|0x400020|0x40001c|0x400018|0x400014}
+
+
+5 isEndcounter
+
+
+12 textSize
+20 instrCounter
+30 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x400024:2
+0x400020:3
+0x40001c:4
+0x400018:5
+
+
+--ID stage--
+0x400024
+0 MemWrite
+0 MemRead
+0 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+1 Branch
+0 regData1
+0 regData2
+0x400014 jumpAddr hex
+4194324 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x400024 ifid stall
+0 0x400024 ifid flush
+0 0x400020 idex stall
+
+
+--EX stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+2 tmpData1
+2 tmpData2
+2 ALUdata1
+-1 ALUdata2
+1 aluResult
+
+
+--MEM stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+14 aluResult(value)
+0xe aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+2 regData2 : decimal
+0x2 regData2 : hex
+0x400014 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x400014 jumpAddr
+0x400014 Reg.PC
+
+===== Cycle 30 =====
+Current pipeline PC state:
+{|0x400024|0x400020|0x40001c|0x400018}
+
+
+5 isEndcounter
+
+
+12 textSize
+21 instrCounter
+31 debugCounter
+
+
+--Pipeline Stages--
+0x400014:1
+0x0:0
+0x400024:3
+0x400020:4
+0x40001c:5
+
+
+--IF stage--
+0x400014
+11 op decimal
+0xb op hex
+2 rs
+1 rt
+0 rd
+1 imm
+0x0 funct hex
+
+--WB stage--
+0x40001c
+0x3 0xe
+
+--Hazard--
+0 0x400014 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x400024 idex stall
+
+
+--EX stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+1 aluResult(value)
+0x1 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+2 regData2 : decimal
+0x2 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400018 Reg.PC
+
+===== Cycle 31 =====
+Current pipeline PC state:
+{0x400014||0x400024|0x400020|0x40001c}
+
+
+5 isEndcounter
+
+
+12 textSize
+22 instrCounter
+32 debugCounter
+
+
+--Pipeline Stages--
+0x400018:1
+0x400014:2
+0x0:0
+0x400024:4
+0x400020:5
+
+
+--IF stage--
+0x400018
+5 op decimal
+0x5 op hex
+1 rs
+0 rt
+0 rd
+3 imm
+0x0 funct hex
+
+--WB stage--
+0x400020
+0x2 0x1
+
+--ID stage--
+0x400014
+0 MemWrite
+0 MemRead
+1 RegWrite
+4 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+0 Branch
+1 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400018 stPC stall
+0 0x400014 ifid stall
+0 0x400014 ifid flush
+0 0x0 idex stall
+
+
+--MEM stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x40001c Reg.PC
+
+===== Cycle 32 =====
+Current pipeline PC state:
+{0x400018|0x400014||0x400024|0x400020}
+
+
+5 isEndcounter
+
+
+12 textSize
+23 instrCounter
+33 debugCounter
+
+
+--Pipeline Stages--
+0x40001c:1
+0x400018:2
+0x400014:3
+0x0:0
+0x400024:5
+
+
+--IF stage--
+0x40001c
+0 op decimal
+0x0 op hex
+3 rs
+2 rt
+3 rd
+0 imm
+0x21 funct hex
+
+
+--ID stage--
+0x400018
+0 MemWrite
+0 MemRead
+0 RegWrite
+1 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+2 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x40001c stPC stall
+0 0x400018 ifid stall
+0 0x400018 ifid flush
+0 0x400014 idex stall
+
+
+--EX stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+1 tmpData1
+0 tmpData2
+1 ALUdata1
+1 ALUdata2
+0 aluResult
+
+
+--PC state--
+0x0 jumpAddr
+0x400020 Reg.PC
+
+===== Cycle 33 =====
+Current pipeline PC state:
+{0x40001c|0x400018|0x400014||0x400024}
+
+
+5 isEndcounter
+
+
+12 textSize
+24 instrCounter
+34 debugCounter
+
+
+--Pipeline Stages--
+0x400020:1
+0x40001c:2
+0x400018:3
+0x400014:4
+0x0:0
+
+
+--IF stage--
+0x400020
+9 op decimal
+0x9 op hex
+2 rs
+2 rt
+0 rd
+65535 imm
+0x0 funct hex
+
+
+--ID stage--
+0x40001c
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+0 Branch
+14 regData1
+1 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400020 stPC stall
+0 0x40001c ifid stall
+0 0x40001c ifid flush
+0 0x400018 idex stall
+
+
+--EX stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400024 Reg.PC
+
+===== Cycle 34 =====
+Current pipeline PC state:
+{0x400020|0x40001c|0x400018|0x400014|}
+
+
+5 isEndcounter
+
+
+12 textSize
+24 instrCounter
+35 debugCounter
+
+
+--Pipeline Stages--
+0x400024:1
+0x400020:2
+0x40001c:3
+0x400018:4
+0x400014:5
+
+
+--IF stage--
+0x400024
+2 op decimal
+0x2 op hex
+0 rs
+0 rt
+0 rd
+1048581 imm
+0x0 funct hex
+
+--WB stage--
+0x400014
+0x1 0x0
+
+--ID stage--
+0x400020
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+1 isSignExtend
+0 Branch
+1 regData1
+1 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+1 0x400024 stPC stall
+0 0x400020 ifid stall
+0 0x400020 ifid flush
+0 0x40001c idex stall
+
+
+--EX stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+14 tmpData1
+1 tmpData2
+14 ALUdata1
+1 ALUdata2
+15 aluResult
+
+
+--MEM stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400028 Reg.PC
+
+===== Cycle 35 =====
+Current pipeline PC state:
+{0x400024|0x400020|0x40001c|0x400018|0x400014}
+
+
+5 isEndcounter
+
+
+12 textSize
+25 instrCounter
+36 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x400024:2
+0x400020:3
+0x40001c:4
+0x400018:5
+
+
+--ID stage--
+0x400024
+0 MemWrite
+0 MemRead
+0 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+1 Branch
+0 regData1
+0 regData2
+0x400014 jumpAddr hex
+4194324 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x400024 ifid stall
+0 0x400024 ifid flush
+0 0x400020 idex stall
+
+
+--EX stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+1 tmpData1
+1 tmpData2
+1 ALUdata1
+-1 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+15 aluResult(value)
+0xf aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+1 regData2 : decimal
+0x1 regData2 : hex
+0x400014 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x400014 jumpAddr
+0x400014 Reg.PC
+
+===== Cycle 36 =====
+Current pipeline PC state:
+{|0x400024|0x400020|0x40001c|0x400018}
+
+
+5 isEndcounter
+
+
+12 textSize
+26 instrCounter
+37 debugCounter
+
+
+--Pipeline Stages--
+0x400014:1
+0x0:0
+0x400024:3
+0x400020:4
+0x40001c:5
+
+
+--IF stage--
+0x400014
+11 op decimal
+0xb op hex
+2 rs
+1 rt
+0 rd
+1 imm
+0x0 funct hex
+
+--WB stage--
+0x40001c
+0x3 0xf
+
+--Hazard--
+0 0x400014 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x400024 idex stall
+
+
+--EX stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--MEM stage--
+0x400020
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+1 regData2 : decimal
+0x1 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400018 Reg.PC
+
+===== Cycle 37 =====
+Current pipeline PC state:
+{0x400014||0x400024|0x400020|0x40001c}
+
+
+5 isEndcounter
+
+
+12 textSize
+27 instrCounter
+38 debugCounter
+
+
+--Pipeline Stages--
+0x400018:1
+0x400014:2
+0x0:0
+0x400024:4
+0x400020:5
+
+
+--IF stage--
+0x400018
+5 op decimal
+0x5 op hex
+1 rs
+0 rt
+0 rd
+3 imm
+0x0 funct hex
+
+--WB stage--
+0x400020
+0x2 0x0
+
+--ID stage--
+0x400014
+0 MemWrite
+0 MemRead
+1 RegWrite
+4 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+0 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400018 stPC stall
+0 0x400014 ifid stall
+0 0x400014 ifid flush
+0 0x0 idex stall
+
+
+--MEM stage--
+0x400024
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x40001c Reg.PC
+
+===== Cycle 38 =====
+Current pipeline PC state:
+{0x400018|0x400014||0x400024|0x400020}
+
+
+5 isEndcounter
+
+
+12 textSize
+28 instrCounter
+39 debugCounter
+
+
+--Pipeline Stages--
+0x40001c:1
+0x400018:2
+0x400014:3
+0x0:0
+0x400024:5
+
+
+--IF stage--
+0x40001c
+0 op decimal
+0x0 op hex
+3 rs
+2 rt
+3 rd
+0 imm
+0x21 funct hex
+
+
+--ID stage--
+0x400018
+0 MemWrite
+0 MemRead
+0 RegWrite
+1 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+2 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x40001c stPC stall
+0 0x400018 ifid stall
+0 0x400018 ifid flush
+0 0x400014 idex stall
+
+
+--EX stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+1 ALUdata2
+1 aluResult
+
+
+--PC state--
+0x0 jumpAddr
+0x400020 Reg.PC
+
+===== Cycle 39 =====
+Current pipeline PC state:
+{0x40001c|0x400018|0x400014||0x400024}
+
+
+5 isEndcounter
+
+
+12 textSize
+29 instrCounter
+40 debugCounter
+
+
+--Pipeline Stages--
+0x400020:1
+0x40001c:2
+0x400018:3
+0x400014:4
+0x0:0
+
+
+--IF stage--
+0x400020
+9 op decimal
+0x9 op hex
+2 rs
+2 rt
+0 rd
+65535 imm
+0x0 funct hex
+
+
+--ID stage--
+0x40001c
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+0 Branch
+15 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x400020 stPC stall
+0 0x40001c ifid stall
+0 0x40001c ifid flush
+0 0x400018 idex stall
+
+
+--EX stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+1 tmpData1
+0 tmpData2
+1 ALUdata1
+0 ALUdata2
+1 aluResult
+
+
+--MEM stage--
+0x400014
+0 rsForwarding
+0 rtForwarding
+1 aluResult(value)
+0x1 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400024 Reg.PC
+
+===== Cycle 40 =====
+Current pipeline PC state:
+{0x400020|0x40001c|0x400018|0x400014|}
+
+
+5 isEndcounter
+
+
+12 textSize
+29 instrCounter
+41 debugCounter
+
+
+--Pipeline Stages--
+0x400024:1
+0x400020:2
+0x40001c:3
+0x400018:4
+0x400014:5
+
+
+--IF stage--
+0x400024
+2 op decimal
+0x2 op hex
+0 rs
+0 rt
+0 rd
+1048581 imm
+0x0 funct hex
+
+--WB stage--
+0x400014
+0x1 0x1
+
+--ID stage--
+0x400020
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+1 RegDST
+0 MemByte
+1 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+1 isSignExtend
+0 Branch
+0 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+1 0x400024 stPC stall
+0 0x400020 ifid stall
+0 0x400020 ifid flush
+0 0x40001c idex stall
+
+
+--EX stage--
+0x40001c
+0 rsForwarding
+0 rtForwarding
+15 tmpData1
+0 tmpData2
+15 ALUdata1
+0 ALUdata2
+15 aluResult
+
+
+--MEM stage--
+0x400018
+1 rsForwarding
+0 rtForwarding
+1 aluResult(value)
+0x1 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x400028 jumpAddr : hex
+1 exmem flush
+
+
+--PC state--
+0x400028 jumpAddr
+0x400028 Reg.PC
+
+===== Cycle 41 =====
+Current pipeline PC state:
+{0x400024|0x400020|0x40001c|0x400018|0x400014}
+
+
+5 isEndcounter
+
+
+12 textSize
+30 instrCounter
+42 debugCounter
+
+
+--Pipeline Stages--
+0x400028:1
+0x0:0
+0x0:0
+0x0:0
+0x400018:5
+
+
+--IF stage--
+0x400028
+0 op decimal
+0x0 op hex
+3 rs
+0 rt
+4 rd
+0 imm
+0x21 funct hex
+
+
+--Hazard--
+0 0x400028 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x0 idex stall
+
+
+--PC state--
+0x0 jumpAddr
+0x40002c Reg.PC
+
+===== Cycle 42 =====
+Current pipeline PC state:
+{0x400028||||0x400018}
+
+
+5 isEndcounter
+
+
+12 textSize
+31 instrCounter
+43 debugCounter
+
+
+--Pipeline Stages--
+0x40002c:1
+0x400028:2
+0x0:0
+0x0:0
+0x0:0
+
+
+--IF stage--
+0x40002c
+0 op decimal
+0x0 op hex
+31 rs
+0 rt
+0 rd
+0 imm
+0x8 funct hex
+
+
+--ID stage--
+0x400028
+0 MemWrite
+0 MemRead
+1 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+0 Branch
+15 regData1
+0 regData2
+0x0 jumpAddr hex
+0 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x40002c stPC stall
+0 0x400028 ifid stall
+0 0x400028 ifid flush
+0 0x0 idex stall
+
+
+--PC state--
+0x0 jumpAddr
+0x400030 Reg.PC
+
+===== Cycle 43 =====
+Current pipeline PC state:
+{0x40002c|0x400028|||}
+
+
+2 isEndcounter
+
+
+12 textSize
+31 instrCounter
+44 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x40002c:2
+0x400028:3
+0x0:0
+0x0:0
+
+
+--ID stage--
+0x40002c
+0 MemWrite
+0 MemRead
+0 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+0 isSignExtend
+1 Branch
+4194320 regData1
+0 regData2
+0x400010 jumpAddr hex
+4194320 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x40002c ifid stall
+0 0x40002c ifid flush
+0 0x400028 idex stall
+
+
+--EX stage--
+0x400028
+0 rsForwarding
+0 rtForwarding
+15 tmpData1
+0 tmpData2
+15 ALUdata1
+0 ALUdata2
+15 aluResult
+
+
+--PC state--
+0x400010 jumpAddr
+0x400010 Reg.PC
+
+===== Cycle 44 =====
+Current pipeline PC state:
+{|0x40002c|0x400028||}
+
+
+5 isEndcounter
+
+
+12 textSize
+31 instrCounter
+45 debugCounter
+
+
+--Pipeline Stages--
+0x400010:1
+0x0:0
+0x40002c:3
+0x400028:4
+0x0:0
+
+
+--IF stage--
+0x400010
+2 op decimal
+0x2 op hex
+0 rs
+0 rt
+0 rd
+1048588 imm
+0x0 funct hex
+
+
+--Hazard--
+1 0x400010 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x40002c idex stall
+
+
+--EX stage--
+0x40002c
+0 rsForwarding
+0 rtForwarding
+4194320 tmpData1
+0 tmpData2
+4194320 ALUdata1
+0 ALUdata2
+4194320 aluResult
+
+
+--MEM stage--
+0x400028
+0 rsForwarding
+0 rtForwarding
+15 aluResult(value)
+0xf aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400014 Reg.PC
+
+===== Cycle 45 =====
+Current pipeline PC state:
+{0x400010||0x40002c|0x400028|}
+
+
+5 isEndcounter
+
+
+12 textSize
+31 instrCounter
+46 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x400010:2
+0x0:0
+0x40002c:4
+0x400028:5
+
+--WB stage--
+0x400028
+0x4 0xf
+
+--ID stage--
+0x400010
+0 MemWrite
+0 MemRead
+0 RegWrite
+0 ALUop
+0 RegDST
+0 MemByte
+0 ALUsrc
+0 ALUsrc2
+0 RegWriteSource
+0 rsForwarding
+0 rtForwarding
+2 isSignExtend
+1 Branch
+0 regData1
+0 regData2
+0x400030 jumpAddr hex
+4194352 jumpAddr decimal
+0x0 IDjumpAddr hex
+0 IDjumpAddr decimal
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x400010 ifid stall
+0 0x400010 ifid flush
+0 0x0 idex stall
+
+
+--MEM stage--
+0x40002c
+0 rsForwarding
+0 rtForwarding
+4194320 aluResult(value)
+0x400010 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x400030 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x400030 jumpAddr
+0x400030 Reg.PC
+
+===== Cycle 46 =====
+Current pipeline PC state:
+{|0x400010||0x40002c|0x400028}
+
+
+2 isEndcounter
+
+
+12 textSize
+32 instrCounter
+47 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x0:0
+0x400010:3
+0x0:0
+0x40002c:5
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x400010 idex stall
+
+
+--EX stage--
+0x400010
+0 rsForwarding
+0 rtForwarding
+0 tmpData1
+0 tmpData2
+0 ALUdata1
+0 ALUdata2
+0 aluResult
+
+
+--PC state--
+0x0 jumpAddr
+0x400030 Reg.PC
+
+===== Cycle 47 =====
+Current pipeline PC state:
+{||0x400010||0x40002c}
+
+
+1 isEndcounter
+
+
+12 textSize
+33 instrCounter
+48 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x0:0
+0x0:0
+0x400010:4
+0x0:0
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x0 idex stall
+
+
+--MEM stage--
+0x400010
+0 rsForwarding
+0 rtForwarding
+0 aluResult(value)
+0x0 aluResult(addr)
+0 memData : decimal
+0x0 memData : hex
+0 regData2 : decimal
+0x0 regData2 : hex
+0x0 jumpAddr : hex
+0 exmem flush
+
+
+--PC state--
+0x0 jumpAddr
+0x400030 Reg.PC
+
+===== Cycle 48 =====
+Current pipeline PC state:
+{|||0x400010|}
+
+
+1 isEndcounter
+
+
+12 textSize
+33 instrCounter
+49 debugCounter
+
+
+--Pipeline Stages--
+0x0:0
+0x0:0
+0x0:0
+0x0:0
+0x400010:5
+
+
+--Hazard--
+0 0x0 stPC stall
+0 0x0 ifid stall
+0 0x0 ifid flush
+0 0x0 idex stall
+
+
+--PC state--
+0x0 jumpAddr
+0x400030 Reg.PC
+
+===== Cycle 49 =====
+Current pipeline PC state:
+{||||0x400010}
+
+
+0 isEndcounter
+
+
+12 textSize
+34 instrCounter
+50 debugCounter
+
+===== Completion cycle: 49 =====
+
+Current pipeline PC state:
+{||||}
+
+Current register values:
+PC: 0x400030
+Registers:
+R0: 0x0
+R1: 0x1
+R2: 0x0
+R3: 0xf
+R4: 0xf
+R5: 0x0
+R6: 0x0
+R7: 0x0
+R8: 0x10000000
+R9: 0x5
+R10: 0x0
+R11: 0x0
+R12: 0x0
+R13: 0x0
+R14: 0x0
+R15: 0x0
+R16: 0x0
+R17: 0x0
+R18: 0x0
+R19: 0x0
+R20: 0x0
+R21: 0x0
+R22: 0x0
+R23: 0x0
+R24: 0x0
+R25: 0x0
+R26: 0x0
+R27: 0x0
+R28: 0x0
+R29: 0x0
+R30: 0x0
+R31: 0x400010
+
