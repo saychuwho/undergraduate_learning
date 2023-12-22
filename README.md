@@ -48,4 +48,16 @@ This repository is place for my undergraduate codes. There are algorithm problem
   - linear regression practice
   - supervised learning practice using scikit-learn
   - unsupervised learning practice using scikit-learn
-  - 
+
+- Operating System
+  - All codes works on modified xv6 x86 version which is in [DGIST datalab](https://github.com/dgist-datalab/xv6)
+  - Every project have proper branches
+  - Project code is in .patch form.
+  - project 1 : CFS scheduler + process priority change system call / EEVDF scheduler (rbtree.c, rbtree.h from linux 2.6.23 is needed)
+  - project 2 : inverted page table (not work properly since this doesn't pass all usertests, but it boots)
+  - project 3 : RAID 5 (it requires lots of disk block cache)
+
+- Computer Algorithm
+  - project 3, project 4 answer code is uploaded with problems
+  - project 3 : graph algorithm, dynamic programming
+  - project 4 : greedy algorithm, min-cut max-flow theorem

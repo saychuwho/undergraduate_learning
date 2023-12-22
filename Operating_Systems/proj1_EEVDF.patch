@@ -1,0 +1,1100 @@
+diff --git a/Makefile b/Makefile
+index 04da7c6..2764aca 100644
+--- a/Makefile
++++ b/Makefile
+@@ -27,6 +27,7 @@ OBJS = \
+ 	uart.o\
+ 	vectors.o\
+ 	vm.o\
++	rbtree.o\
+ 
+ # Cross-compiling (e.g., on Mac OS X)
+ # TOOLPREFIX = i386-jos-elf
+@@ -182,7 +183,12 @@ UPROGS=\
+ 	_usertests\
+ 	_wc\
+ 	_zombie\
+-	#_hostname\
++	_hostname\
++	_bench1\
++	_bench2\
++	_bench3\
++	_bench4\
++	_bench5\
+ 
+ fs.img: mkfs README $(UPROGS)
+ 	./mkfs fs.img README $(UPROGS)
+@@ -219,7 +225,7 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
+ 	then echo "-gdb tcp::$(GDBPORT)"; \
+ 	else echo "-s -p $(GDBPORT)"; fi)
+ ifndef CPUS
+-CPUS := 2
++CPUS := 1
+ endif
+ QEMUOPTS = -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA)
+ 
+diff --git a/defs.h b/defs.h
+index 92c4550..c045cc4 100644
+--- a/defs.h
++++ b/defs.h
+@@ -10,6 +10,8 @@ struct sleeplock;
+ struct stat;
+ struct superblock;
+ 
++struct cfs_prior;
++
+ // bio.c
+ void            binit(void);
+ struct buf*     bread(uint, uint);
+@@ -121,6 +123,40 @@ int             wait(void);
+ void            wakeup(void*);
+ void            yield(void);
+ 
++// prj 01
++extern uint sched_mode;
++extern uint sched_latency;
++extern uint min_granularity;
++extern uint nice_value;
++extern uint sched_tick;
++extern uint sched_time_slice;
++extern uint curproc_num;
++extern uint runnable_proc_num;
++
++// prj 01 - EEVDF
++extern int VirtualTime;
++extern int TotalWeight;
++
++// prj 01 - extra
++extern struct cfs_prior *Priority;
++
++// prj 01
++extern uint sched_mode;
++extern uint sched_latency;
++extern uint min_granularity;
++extern uint nice_value;
++extern uint sched_tick;
++extern uint sched_time_slice;
++extern uint curproc_num;
++extern uint runnable_proc_num;
++
++// prj 01 - EEVDF
++extern int VirtualTime;
++extern int TotalWeight;
++
++// prj 01 - extra
++extern struct cfs_prior *Priority;
++
+ // swtch.S
+ void            swtch(struct context**, struct context*);
+ 
+diff --git a/hostname.c b/hostname.c
+index 91757f4..dfa3dc6 100644
+--- a/hostname.c
++++ b/hostname.c
+@@ -13,4 +13,4 @@ main(int argc, char *argv[])
+   sethostname(argv[1]);
+ 
+   exit();
+-}
++}
+\ No newline at end of file
+diff --git a/param.h b/param.h
+index a7e90ef..0911c12 100644
+--- a/param.h
++++ b/param.h
+@@ -1,7 +1,7 @@
+ #define NPROC        64  // maximum number of processes
+ #define KSTACKSIZE 4096  // size of per-process kernel stack
+ #define NCPU          8  // maximum number of CPUs
+-#define NOFILE       16  // open files per process
++#define NOFILE      100  // open files per process // prj 01
+ #define NFILE       100  // open files per system
+ #define NINODE       50  // maximum number of active i-nodes
+ #define NDEV         10  // maximum major device number
+diff --git a/proc.c b/proc.c
+index 806b1b1..654468c 100644
+--- a/proc.c
++++ b/proc.c
+@@ -6,10 +6,13 @@
+ #include "x86.h"
+ #include "proc.h"
+ #include "spinlock.h"
++#include "syscall.h" // mini-prj 02
++#include "rbtree.h" // prj 01
+ 
+ struct {
+   struct spinlock lock;
+   struct proc proc[NPROC];
++  struct rb_root proc_tree; // prj 01
+ } ptable;
+ 
+ static struct proc *initproc;
+@@ -20,12 +23,51 @@ extern void trapret(void);
+ 
+ static void wakeup1(void *chan);
+ 
++// prj 01
++uint sched_mode = EEVDF;
++
++uint sched_latency = 16;
++uint min_granularity = 2;
++uint nice_value = 0;
++
++uint sched_tick;
++uint sched_time_slice;
++
++uint curproc_num = 0;
++uint runnable_proc_num = 0;
++
++// prj 01 - EEVDF
++int VirtualTime = 0;
++int TotalWeight = 0;
++
++struct cfs_prior priority[PRIORITY];
++struct cfs_prior *Priority;
++
++uint nice_value_array[PRIORITY] = {1, 100, 500};
++
++// prj 01
+ void
+ pinit(void)
+ {
++  // prj 01
++  if(sched_mode == CFS){
++    sched_tick = ticks + sched_latency;
++    sched_time_slice = sched_latency;
++    if(CFS_EXTRA){
++      Priority = priority;
++      for(int i=0;i<PRIORITY;i++){
++        priority[i].runnable_proc_num = 0;
++        priority[i].curproc_num = 0;
++        priority[i].time_slice = sched_latency;
++      }
++    }
++  }
++  ptable.proc_tree = RB_ROOT;
++
+   initlock(&ptable.lock, "ptable");
+ }
+ 
++
+ // Must be called with interrupts disabled
+ int
+ cpuid() {
+@@ -89,6 +131,31 @@ found:
+   p->state = EMBRYO;
+   p->pid = nextpid++;
+ 
++  // prj 01
++  // prj 01 + extra
++  if(sched_mode == CFS){
++    p->key = 0;
++    p->last_sched_time = ticks;
++    p->s_mode = sched_mode;
++    
++    if(CFS_EXTRA){
++      p->nice_value = 0;
++      p->yield_num = 0;
++    }
++    
++    proc_tree_insert(p, &ptable.proc_tree, DEBUG_PROC_TREE, ALLOCPROC);
++  }
++  else if(sched_mode == EEVDF){
++    // init the proc values
++    p->s_mode = sched_mode;
++    p->lag = 0;
++    p->last_sched_time = ticks;
++    p->weight = 1;
++    p->quantum = 1;
++    // add proc into proc_tree
++    eevdf_join(p, ALLOCPROC);
++    proc_tree_insert(p, &ptable.proc_tree, DEBUG_PROC_TREE, ALLOCPROC);
++  }
+   release(&ptable.lock);
+ 
+   // Allocate kernel stack.
+@@ -112,6 +179,7 @@ found:
+   memset(p->context, 0, sizeof *p->context);
+   p->context->eip = (uint)forkret;
+ 
++  p->start_tick = ticks; // mini-prj 01
+   return p;
+ }
+ 
+@@ -231,9 +299,13 @@ exit(void)
+   struct proc *p;
+   int fd;
+ 
++  // mini-proj 01
++  cprintf("\n%s(%d) took %d ticks in wallclock\n", curproc->name, curproc->pid, ticks - curproc->start_tick);
++
+   if(curproc == initproc)
+     panic("init exiting");
+ 
++
+   // Close all open files.
+   for(fd = 0; fd < NOFILE; fd++){
+     if(curproc->ofile[fd]){
+@@ -249,6 +321,15 @@ exit(void)
+ 
+   acquire(&ptable.lock);
+ 
++  if(sched_mode == CFS){
++    // prj 01
++    proc_tree_erase(curproc, &ptable.proc_tree, DEBUG_PROC_TREE, EXIT);
++  }
++  else if(sched_mode == EEVDF){
++    eevdf_leave(curproc, EXIT);
++    proc_tree_erase(curproc, &ptable.proc_tree, DEBUG_PROC_TREE, EXIT);
++  }
++
+   // Parent might be sleeping in wait().
+   wakeup1(curproc->parent);
+ 
+@@ -319,6 +400,7 @@ wait(void)
+ //  - swtch to start running that process
+ //  - eventually that process transfers control
+ //      via swtch back to the scheduler.
++// scheduler() extra
+ void
+ scheduler(void)
+ {
+@@ -330,25 +412,199 @@ scheduler(void)
+     // Enable interrupts on this processor.
+     sti();
+ 
+-    // Loop over process table looking for process to run.
+     acquire(&ptable.lock);
+-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+-      if(p->state != RUNNABLE)
+-        continue;
+-
+-      // Switch to chosen process.  It is the process's job
+-      // to release ptable.lock and then reacquire it
+-      // before jumping back to us.
+-      c->proc = p;
+-      switchuvm(p);
+-      p->state = RUNNING;
+-
+-      swtch(&(c->scheduler), p->context);
+-      switchkvm();
+-
+-      // Process is done running for now.
+-      // It should have changed its p->state before coming back.
+-      c->proc = 0;
++    if(sched_mode == ROUND_ROBIN){
++      // Loop over process table looking for process to run.
++      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
++        if(p->state != RUNNABLE)
++          continue;
++
++        // Switch to chosen process.  It is the process's job
++        // to release ptable.lock and then reacquire it
++        // before jumping back to us.
++        c->proc = p;
++        switchuvm(p);
++        p->state = RUNNING;
++
++        swtch(&(c->scheduler), p->context);
++        switchkvm();
++
++        // Process is done running for now.
++        // It should have changed its p->state before coming back.
++        c->proc = 0;
++      }
++    }
++    else if(sched_mode == CFS){
++      // get p from proc_tree_root and change p->key, p->time_slice
++      struct rb_node *first = rb_first(&ptable.proc_tree);
++      struct rb_node *last = rb_last(&ptable.proc_tree);
++      struct rb_node *next = NULL;
++      p = rb_entry(first, struct proc, node);
++
++      for(int i=0; i<curproc_num; i++){
++        //cprintf(p->name);
++        //cprintf(" is in tree : %d\n", ticks);
++
++        if (p->state != RUNNABLE){
++          if(next == last){
++            break;
++          }
++          next = rb_next(&p->node);
++          p = rb_entry(next, struct proc, node);
++          continue;
++        }
++
++        p->last_sched_time = ticks;
++
++      
++        if (DEBUG_SCHED_PICK){
++          cprintf("\n... SCHEDULER picked p (ticks : %d called : %d) ...\n", ticks, SCHEDULER);
++          cprintf("curproc_num : %d\n", curproc_num);
++          cprintf("runnable_proc_num : %d\n", runnable_proc_num);
++          cprintf("sched tick : %d\n", sched_tick);
++          cprintf("sched time slice : %d\n", sched_time_slice);
++          cprintf("p->pid : %d\n", p->pid);
++          cprintf("p->key : %d\n", p->key);
++          cprintf("p->time_slice : %d\n", p->time_slice);
++          cprintf("p->last_sched_time : %d\n", p->last_sched_time);
++          cprintf("\n... tree keys ...\n");
++          next = first;
++          for (int i = 0; i < curproc_num;i++){
++            cprintf("key of pid - %d (state : %d) : %d\n", rb_entry(next, struct proc, node)->pid, rb_entry(next, struct proc, node)->state, rb_entry(next, struct proc, node)->key);
++            next = rb_next(next);
++          }
++        }
++
++        // Switch to chosen process.  It is the process's job
++        // to release ptable.lock and then reacquire it
++        // before jumping back to us.
++        c->proc = p;
++        switchuvm(p);
++        p->state = RUNNING;
++
++        swtch(&(c->scheduler), p->context);
++        switchkvm();
++
++        // Process is done running for now.
++        // It should have changed its p->state before coming back.
++        c->proc = 0;
++        break;
++      }
++    }
++    else if(sched_mode == EEVDF){
++
++      // get p from proc_tree_root and change p->key, p->time_slice
++      struct rb_node *first = rb_first(&ptable.proc_tree);
++      struct rb_node *last = rb_last(&ptable.proc_tree);
++      struct rb_node *next = NULL;
++      p = rb_entry(first, struct proc, node);
++
++      //if(curproc_num > 12)
++      //  cprintf("p->tf->eip : %d\n", p->tf->eip);
++
++      for(int i=0; i<curproc_num; i++){
++        //cprintf(p->name);
++        //cprintf(" is in tree : %d\n", ticks);
++
++        if (p->vt_eligible < VirtualTime){
++          p->lag = 0;
++        }
++
++        if (p->state != RUNNABLE || p->lag < 0){
++          if(DEBUG_SCHED_ALLOC){
++            cprintf("\n... debug in scheduler (ticks : %d) ...\n", ticks);
++            cprintf("p->pid : %d\n", p->pid);
++            cprintf("p->state : %d\n", p->state);
++            cprintf("p->lag : %d\n", p->lag);
++          }
++          if(next == last){
++            if(DEBUG_SCHED_ALLOC){
++              cprintf("no proc inside tree is RUNNABLE or eligible\n");
++            }
++            break;
++          }
++          next = rb_next(&p->node);
++          p = rb_entry(next, struct proc, node);
++          continue;
++        }
++
++        //if(curproc_num > 3)
++        //  cprintf("\npicked p : %d state : %d\n", p->pid, p->state);
++
++        if (DEBUG_SCHED_PICK){
++          cprintf("\n... SCHEDULER picked p (ticks : %d called : %d) ...\n", ticks, SCHEDULER);
++          cprintf("curproc_num : %d\n", curproc_num);
++          cprintf("runnable_proc_num : %d\n", runnable_proc_num);
++          cprintf("VirtualTime : %d\n", VirtualTime);
++          cprintf("TotalWeight : %d\n", TotalWeight);
++          cprintf("p->pid : %d\n", p->pid);
++          cprintf("p->key : %d\n", p->key);
++          cprintf("p->lag : %d\n", p->lag);
++          cprintf("p->vt_eligible : %d\n", p->vt_eligible);
++          cprintf("p->used_time : %d\n", p->used_time);
++          cprintf("p->vt_init : %d\n", p->vt_init);
++          cprintf("\n... tree keys ...\n");
++          next = first;
++          for (int i = 0; i<curproc_num;i++){
++            cprintf("key of pid %d : %d (state : %d  lag : %d vt_eligible %d)\n", rb_entry(next, struct proc, node)->pid, rb_entry(next, struct proc, node)->key, rb_entry(next, struct proc, node)->state, rb_entry(next, struct proc, node)->lag, rb_entry(next, struct proc, node)->vt_eligible);
++            if(next != last)
++              next = rb_next(next);
++          }
++        }
++
++        p->used_time = p->used_time + p->quantum;
++        p->last_sched_time = ticks;
++        
++        if(VirtualTime != p->vt_init)
++          p->lag = p->weight*(VirtualTime - p->vt_init) - (VT_MULTIPLE*p->used_time);
++
++        p->vt_eligible += ((p->used_time * VT_MULTIPLE) / p->weight);
++        p->key = p->vt_eligible + ((p->quantum/p->weight)*VT_MULTIPLE);
++        
++        if(DEBUG_SCHED_PICK){
++          cprintf("\n... SCHEDULER calculated and reallocate (ticks : %d called : %d) ...\n", ticks, SCHEDULER);
++          cprintf("curproc_num : %d\n", curproc_num);
++          cprintf("runnable_proc_num : %d\n", runnable_proc_num);
++          cprintf("VirtualTime : %d\n", VirtualTime);
++          cprintf("TotalWeight : %d\n", TotalWeight);
++          cprintf("p->pid : %d\n", p->pid);
++          cprintf("p->key : %d\n", p->key);
++          cprintf("p->lag : %d\n", p->lag);
++          cprintf("p->vt_eligible : %d\n", p->vt_eligible);
++          cprintf("p->used_time : %d\n", p->used_time);
++          cprintf("p->vt_init : %d\n", p->vt_init);
++          cprintf("\n... tree keys ...\n");
++        }
++
++        if(DEBUG_PROC_TREE_3){
++          cprintf("\n... what is in tree ...\n");
++          first = rb_first(&ptable.proc_tree);
++          last = rb_last(&ptable.proc_tree);
++          cprintf("first pid : %d\n", rb_entry(first, struct proc, node)->pid);
++          cprintf("last pid : %d\n", rb_entry(last, struct proc, node)->pid);
++          next = first;
++          for (int i = 0; i<curproc_num;i++){
++            cprintf("key of pid %d : %d (state : %d  lag : %d vt_eligible : %d)\n", rb_entry(next, struct proc, node)->pid, rb_entry(next, struct proc, node)->key, rb_entry(next, struct proc, node)->state, rb_entry(next, struct proc, node)->lag, rb_entry(next, struct proc, node)->vt_eligible);
++            if(next != last)
++              next = rb_next(next);
++          }
++        }
++
++        // Switch to chosen process.  It is the process's job
++        // to release ptable.lock and then reacquire it
++        // before jumping back to us.
++        c->proc = p;
++        switchuvm(p);
++        p->state = RUNNING;
++
++        swtch(&(c->scheduler), p->context);
++        switchkvm();
++
++        // Process is done running for now.
++        // It should have changed its p->state before coming back.
++        c->proc = 0;
++        break;
++      }  
+     }
+     release(&ptable.lock);
+ 
+@@ -387,6 +643,15 @@ yield(void)
+ {
+   acquire(&ptable.lock);  //DOC: yieldlock
+   myproc()->state = RUNNABLE;
++  if(sched_mode == CFS){
++    proc_tree_erase(myproc(), &ptable.proc_tree, DEBUG_PROC_TREE, YIELD);
++    proc_tree_insert(myproc(), &ptable.proc_tree, DEBUG_PROC_TREE, YIELD);
++  }
++  else if(sched_mode == EEVDF){
++    struct proc *p = myproc();
++    proc_tree_erase(p, &ptable.proc_tree, DEBUG_PROC_TREE, YIELD);
++    proc_tree_insert(p, &ptable.proc_tree, DEBUG_PROC_TREE, YIELD);
++  }
+   sched();
+   release(&ptable.lock);
+ }
+@@ -439,6 +704,15 @@ sleep(void *chan, struct spinlock *lk)
+   p->chan = chan;
+   p->state = SLEEPING;
+ 
++  if(sched_mode == CFS){
++    runnable_proc_num--;
++    if(CFS_EXTRA){
++      priority[p->nice_value].runnable_proc_num--;
++    }
++  }
++  else if(sched_mode == EEVDF)
++    eevdf_leave(p, SLEEP);
++
+   sched();
+ 
+   // Tidy up.
+@@ -460,10 +734,20 @@ wakeup1(void *chan)
+   struct proc *p;
+ 
+   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+-    if(p->state == SLEEPING && p->chan == chan)
++    if(p->state == SLEEPING && p->chan == chan){
+       p->state = RUNNABLE;
++      if(sched_mode == CFS){
++        runnable_proc_num++;
++        if(CFS_EXTRA){
++          priority[p->nice_value].runnable_proc_num++;
++        }
++      }
++      else if(sched_mode == EEVDF)
++        eevdf_join(p, WAKEUP);
++    }
+ }
+ 
++
+ // Wake up all processes sleeping on chan.
+ void
+ wakeup(void *chan)
+@@ -532,3 +816,260 @@ procdump(void)
+     cprintf("\n");
+   }
+ }
++
++// mini-prj 02
++int 
++gethostname(char *h_name)
++{
++  struct proc *curproc = myproc();
++  curproc->tf->eax = SYS_gethostname;
++  curproc->tf->esp = (uint)h_name;
++  syscall();
++  return 0;
++}
++
++// mini-prj 02
++int 
++sethostname(const char *h_name)
++{
++  struct proc *curproc = myproc();
++  curproc->tf->eax = SYS_sethostname;
++  curproc->tf->esp = (uint)h_name;
++  syscall();
++  return 0;
++}
++
++
++// insert & delete
++// prj 01
++
++void
++__proc_tree_insert(struct proc *p, struct rb_root *root)
++{
++  // debug
++  //cprintf(p->name);
++  //cprintf(": proc insert called \n");
++  
++  struct rb_node **new = &root->rb_node, *parent = NULL;
++  uint key = p->key;
++  struct proc *parent_proc;
++  while(*new){
++    parent = *new;
++    parent_proc = rb_entry(parent, struct proc, node);
++    if(key < parent_proc->key)
++      new = &parent->rb_left;
++    else{
++      new = &parent->rb_right;
++    }
++  }
++
++  rb_link_node(&p->node, parent, new);
++  rb_insert_color(&p->node, root);
++}
++
++void
++__proc_tree_erase(struct proc *p, struct rb_root *root)
++{
++  // debug
++  //cprintf(p->name);
++  //cprintf(": proc delete called \n");
++
++  rb_erase(&p->node, root);
++}
++
++void
++proc_tree_insert(struct proc *p, struct rb_root *root, int debug, int sysfunc)
++{
++  if(sysfunc != YIELD){
++    curproc_num++;
++    runnable_proc_num++;
++    if(CFS_EXTRA){
++      priority[p->nice_value].curproc_num++;
++      priority[p->nice_value].runnable_proc_num++;
++    }
++  }
++  if(sched_mode == CFS){
++    if(CFS_EXTRA){
++      uint added_key = nice_value_array[p->nice_value]*(priority[p->nice_value].time_slice);
++      p->key = p->key + added_key;
++      p->time_slice = priority[p->nice_value].time_slice;
++    }
++    else{
++      uint added_key = nice_value*(sched_time_slice);
++      p->key = p->key + added_key;
++      p->time_slice = sched_time_slice;
++    }
++  }
++  if (debug){
++    cprintf("\n... proc_tree_insert (ticks : %d called : %d) ...\n", ticks, sysfunc);
++    cprintf("p->pid : %d\n", p->pid);
++    cprintf("p->key : %d\n", p->key);
++    if(sched_mode == CFS){
++      cprintf("curproc_num : %d\n", curproc_num);
++      cprintf("runnable_proc_num : %d\n", runnable_proc_num);
++      cprintf("sched tick : %d\n", sched_tick);
++      cprintf("sched time slice : %d\n", sched_time_slice);
++      cprintf("p->time_slice : %d\n", p->time_slice);
++      cprintf("p->last_sched_time : %d\n", p->last_sched_time);
++    }
++    else if(sched_mode == EEVDF){
++      cprintf("VirtualTime : %d\n", VirtualTime);
++      cprintf("TotalWeight : %d\n", TotalWeight);
++      cprintf("p->lag : %d\n", p->lag);
++      cprintf("p->vt_eligible : %d\n", p->vt_eligible);
++      cprintf("p->used_time : %d\n", p->used_time);
++      cprintf("p->vt_init : %d\n", p->vt_init);
++    }
++  }
++
++  __proc_tree_insert(p, root);
++}
++
++void
++proc_tree_erase(struct proc *p, struct rb_root *root, int debug, int sysfunc)
++{
++  if(sysfunc != YIELD){
++    curproc_num--;
++    runnable_proc_num--;
++    if(CFS_EXTRA){
++      priority[p->nice_value].curproc_num--;
++      priority[p->nice_value].runnable_proc_num--;
++    }
++  }
++  if (debug){
++    cprintf("\n... proc_tree_erase (ticks : %d called : %d) ...\n", ticks, sysfunc);
++    cprintf("p->pid : %d\n", p->pid);
++    cprintf("p->key : %d\n", p->key);
++    if(sched_mode == CFS){
++      cprintf("curproc_num : %d\n", curproc_num);
++      cprintf("runnable_proc_num : %d\n", runnable_proc_num);
++      cprintf("sched tick : %d\n", sched_tick);
++      cprintf("sched time slice : %d\n", sched_time_slice);
++      cprintf("p->time_slice : %d\n", p->time_slice);
++      cprintf("p->last_sched_time : %d\n", p->last_sched_time);
++    }
++    else if(sched_mode == EEVDF){
++      cprintf("VirtualTime : %d\n", VirtualTime);
++      cprintf("TotalWeight : %d\n", TotalWeight);
++      cprintf("p->lag : %d\n", p->lag);
++      cprintf("p->vt_eligible : %d\n", p->vt_eligible);
++      cprintf("p->used_time : %d\n", p->used_time);
++      cprintf("p->vt_init : %d\n", p->vt_init);
++    }
++  }
++  __proc_tree_erase(p, root);
++}
++
++// prj 01 - EEVDF
++
++void
++eevdf_join(struct proc *p, int sysfunc)
++{
++  if(DEBUG_EEVDF){
++    cprintf("\n... eevdf_join called (ticks : %d called : %d) ...\n", ticks, sysfunc);
++    cprintf("p->pid : %d\n", p->pid);
++    cprintf("VirtualTime before : %d\n", VirtualTime);
++    cprintf("TotalWeight before : %d\n", TotalWeight);
++  }
++  TotalWeight += p->weight;
++  if(DEBUG_EEVDF)
++    cprintf("TotalWeight after : %d\n", TotalWeight);
++  p->used_time = 0;
++  VirtualTime = VirtualTime - (p->lag / TotalWeight);
++  p->vt_init = VirtualTime;
++  if(DEBUG_EEVDF)
++    cprintf("VirtualTime after : %d\n", VirtualTime);
++
++
++  p->vt_eligible = VirtualTime;
++  p->key = p->vt_eligible + (p->quantum / p->weight)*VT_MULTIPLE;
++
++}
++
++void
++eevdf_leave(struct proc *p, int sysfunc)
++{
++  if(DEBUG_EEVDF){
++    cprintf("... eevdf_leave called (ticks : %d called : %d) ...\n", ticks, sysfunc);
++    cprintf("p->pid : %d\n", p->pid);
++    cprintf("VirtualTime before : %d\n", VirtualTime);
++    cprintf("TotalWeight before : %d\n", TotalWeight);
++  }
++  TotalWeight -= p->weight;
++  if(DEBUG_EEVDF)
++    cprintf("TotalWeight after : %d\n", TotalWeight);
++  if(TotalWeight > 0)
++    VirtualTime = VirtualTime + (p->lag / TotalWeight);
++  if(DEBUG_EEVDF)
++    cprintf("VirtualTime after : %d\n", VirtualTime);
++}
++
++int
++__nice_value_up(struct proc *p)
++{ 
++  if (p->nice_value == 0)
++    return -1;
++  
++  priority[p->nice_value].curproc_num--;
++  priority[p->nice_value].runnable_proc_num--;
++
++  p->nice_value--;
++
++  priority[p->nice_value].curproc_num++;
++  priority[p->nice_value].runnable_proc_num++;
++
++  for(int i=0;i<PRIORITY;i++){
++    if(priority[i].runnable_proc_num >= 1){
++      priority[i].time_slice = sched_latency / priority[i].runnable_proc_num;
++      if(priority[i].time_slice < min_granularity)
++        priority[i].time_slice = min_granularity;
++    }
++  }
++
++  return 0;
++}
++
++int
++__nice_value_down(struct proc *p){
++  if (p->nice_value == PRIORITY)
++    return -1;
++
++  priority[p->nice_value].curproc_num--;
++  priority[p->nice_value].runnable_proc_num--;
++
++  p->nice_value++;
++
++  priority[p->nice_value].curproc_num++;
++  priority[p->nice_value].runnable_proc_num++;
++
++  for(int i=0;i<PRIORITY;i++){
++    if(priority[i].runnable_proc_num >= 1){
++      priority[i].time_slice = sched_latency / priority[i].runnable_proc_num;
++      if(priority[i].time_slice < min_granularity)
++        priority[i].time_slice = min_granularity;
++    }
++  }
++
++
++  return 0;
++}
++
++// prj 01 extra - user function
++
++int
++nicevalueup(void)
++{
++  struct proc *curproc = myproc();
++  curproc->tf->eax = SYS_nicevalueup;
++  syscall();
++  return 0;
++}
++
++int
++nicevaluedown(void)
++{
++  struct proc *curproc = myproc();
++  curproc->tf->eax = SYS_nicevaluedown;
++  syscall();
++  return 0;
++}
+\ No newline at end of file
+diff --git a/proc.h b/proc.h
+index 1647114..ee9b833 100644
+--- a/proc.h
++++ b/proc.h
+@@ -1,3 +1,8 @@
++#ifndef PROC
++#define PROC
++
++#include "rbtree.h" // prj 01
++
+ // Per-CPU state
+ struct cpu {
+   uchar apicid;                // Local APIC ID
+@@ -49,6 +54,26 @@ struct proc {
+   struct file *ofile[NOFILE];  // Open files
+   struct inode *cwd;           // Current directory
+   char name[16];               // Process name (debugging)
++  uint start_tick; // mini-prj 01
++
++  // prj 01
++  uint key;                    // vruntime in CFS, deadline in EEVDF
++  uint time_slice;
++  struct rb_node node;
++  uint s_mode;
++  uint last_sched_time;
++
++  // prj 01 - EEVDF
++  int lag;
++  int vt_eligible;
++  int weight;
++  int quantum;
++  int used_time;
++  int vt_init;
++
++  // prj 01 extra
++  uint nice_value;
++  uint yield_num;
+ };
+ 
+ // Process memory is laid out contiguously, low addresses first:
+@@ -56,3 +81,47 @@ struct proc {
+ //   original data and bss
+ //   fixed-size stack
+ //   expandable heap
++
++// prj 01
++#define ROUND_ROBIN 0
++#define CFS 1
++#define EEVDF 2
++
++#define VT_MULTIPLE 10
++
++#define DEBUG_PROC_TREE 0
++#define DEBUG_PROC_TREE_2 0
++#define DEBUG_PROC_TREE_3 0
++#define DEBUG_TRAP_YIELD 0
++#define DEBUG_SCHED_ALLOC 0
++#define DEBUG_SCHED_PICK 0
++#define DEBUG_EEVDF 0
++
++
++
++enum sysfunc { ALLOCPROC, EXIT, SCHEDULER, YIELD, SLEEP, WAKEUP, NICE_VALUE_UP, NICE_VALUE_DOWN };
++
++void proc_tree_init();
++void __proc_tree_insert(struct proc *p, struct rb_root *root);
++void __proc_tree_erase(struct proc *p, struct rb_root *root);
++void proc_tree_insert(struct proc *p, struct rb_root *root, int debug, int sysfunc);
++void proc_tree_erase(struct proc *p, struct rb_root *root, int debug, int sysfunc);
++
++void eevdf_join(struct proc *p, int sysfunc);
++void eevdf_leave(struct proc *p, int sysfunc);
++
++// prj 01 Extra
++
++#define PRIORITY 3
++#define CFS_EXTRA 1
++
++struct cfs_prior{
++  uint curproc_num;
++  uint runnable_proc_num;
++  uint time_slice;
++};
++
++int __nice_value_up(struct proc *p);
++int __nice_value_down(struct proc *p);
++
++#endif
+\ No newline at end of file
+diff --git a/sh.c b/sh.c
+index f3c063c..8c73308 100644
+--- a/sh.c
++++ b/sh.c
+@@ -177,6 +177,8 @@ getcmd(char *buf, int nbuf)
+ {
+   char hostname[64] = { 0, };
+   // TODO: Fill in hostname using gethostname()
++  gethostname(hostname); // mini-prj 02
++
+   printf(2, "root@%s:%s$ ", hostname, pwd);
+   memset(buf, 0, nbuf);
+   gets(buf, nbuf);
+@@ -210,6 +212,8 @@ main(void)
+         static char tmp[1024] = { 0, };
+         // Append x from chdir(x) to pwd using strcat(), add "/" appropriately
+         // TODO
++        strcat(pwd, buf+3);
++        strcat(pwd, "/");
+ 
+         // Collapse pwd path and save it to tmp
+         collapse_path(pwd, tmp);
+diff --git a/syscall.c b/syscall.c
+index ee85261..be7e185 100644
+--- a/syscall.c
++++ b/syscall.c
+@@ -103,6 +103,10 @@ extern int sys_unlink(void);
+ extern int sys_wait(void);
+ extern int sys_write(void);
+ extern int sys_uptime(void);
++extern int sys_gethostname(void); // mini-prj 02
++extern int sys_sethostname(void); // mini-prj 02
++extern int sys_nicevalueup(void); // prj 01 extra
++extern int sys_nicevaluedown(void); // prj 01 extra
+ 
+ static int (*syscalls[])(void) = {
+ [SYS_fork]    sys_fork,
+@@ -126,6 +130,10 @@ static int (*syscalls[])(void) = {
+ [SYS_link]    sys_link,
+ [SYS_mkdir]   sys_mkdir,
+ [SYS_close]   sys_close,
++[SYS_gethostname] sys_gethostname, // mini-prj 02
++[SYS_sethostname] sys_sethostname, // mini-prj 02
++[SYS_nicevalueup] sys_nicevalueup, // prj 01 extra
++[SYS_nicevaluedown] sys_nicevaluedown // prj 01 extra
+ };
+ 
+ void
+diff --git a/syscall.h b/syscall.h
+index bc5f356..27fd800 100644
+--- a/syscall.h
++++ b/syscall.h
+@@ -20,3 +20,7 @@
+ #define SYS_link   19
+ #define SYS_mkdir  20
+ #define SYS_close  21
++#define SYS_gethostname 22 // mini-prj 02
++#define SYS_sethostname 23 // mini-prj 02
++#define SYS_nicevalueup 24 // prj 01 extra
++#define SYS_nicevaluedown 25 // prj 01 extra
+\ No newline at end of file
+diff --git a/sysproc.c b/sysproc.c
+index 0686d29..4ab7f70 100644
+--- a/sysproc.c
++++ b/sysproc.c
+@@ -7,6 +7,8 @@
+ #include "mmu.h"
+ #include "proc.h"
+ 
++char hostname[64] = "DataLab";
++
+ int
+ sys_fork(void)
+ {
+@@ -89,3 +91,37 @@ sys_uptime(void)
+   release(&tickslock);
+   return xticks;
+ }
++
++// mini-prj 02
++int 
++sys_gethostname(void)
++{
++  char *h_name;
++  argstr(0, &h_name);
++  strcpy(h_name, hostname);
++  return 0;
++}
++
++// mini-prj 02
++int 
++sys_sethostname(void)
++{
++  char *h_name;
++  argstr(0, &h_name);
++  strcpy(hostname, h_name);
++  return 0;
++}
++
++// prj 01 extra
++
++int
++sys_nicevalueup(void)
++{
++  return __nice_value_up(myproc());
++}
++
++int
++sys_nicevaluedown(void)
++{
++  return __nice_value_down(myproc());
++}
+diff --git a/trap.c b/trap.c
+index 41c66eb..309a73d 100644
+--- a/trap.c
++++ b/trap.c
+@@ -94,17 +94,58 @@ trap(struct trapframe *tf)
+     myproc()->killed = 1;
+   }
+ 
++  // prj 01
++  // change sched_time_slice when sched_latency passes after sched_time_slice changed
++  if(sched_mode == CFS && ticks >= sched_tick){
++    sched_tick = ticks + sched_latency;
++    if(runnable_proc_num >= 1){
++      sched_time_slice = sched_latency / runnable_proc_num;
++      if(sched_time_slice < min_granularity)
++        sched_time_slice = min_granularity;
++    }
++    if(CFS_EXTRA){
++      for(int i=0;i<PRIORITY;i++){
++        if(Priority[i].runnable_proc_num >= 1){
++          Priority[i].time_slice = sched_latency / Priority[i].runnable_proc_num;
++          if(Priority[i].time_slice < min_granularity)
++            Priority[i].time_slice = min_granularity;
++        }
++      }
++    }
++  }
++
++  // prj 01
++  // virtual time update in EEVDF - multiply VT_MULTIPLE to eliminate point num
++  if(sched_mode == EEVDF && TotalWeight > 0){
++    VirtualTime = VirtualTime + (VT_MULTIPLE / TotalWeight);
++  }
++
+   // Force process exit if it has been killed and is in user space.
+   // (If it is still executing in the kernel, let it keep running
+   // until it gets to the regular system call return.)
+   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
+     exit();
+ 
++  struct proc *p = myproc();
++
+   // Force process to give up CPU on clock tick.
+   // If interrupts were on while locks held, would need to check nlock.
+   if(myproc() && myproc()->state == RUNNING &&
+-     tf->trapno == T_IRQ0+IRQ_TIMER)
+-    yield();
++     tf->trapno == T_IRQ0+IRQ_TIMER){
++    if(sched_mode == ROUND_ROBIN)
++      yield();
++    else if(sched_mode == CFS && (p->last_sched_time + p->time_slice) < ticks){
++      if(DEBUG_TRAP_YIELD){
++        cprintf("\n... timer interrupt called yield (ticks : %d) ...\n", ticks);
++        cprintf("p->last_sched_time : %d\n", p->last_sched_time);
++        cprintf("p->time_slice : %d\n", p->time_slice);
++      }
++      yield();
++    }
++    else if(sched_mode == EEVDF && ((p->last_sched_time + p->quantum) < ticks)){
++      yield();
++    }
++  }  
+ 
+   // Check if the process has been killed since we yielded
+   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
+diff --git a/types.h b/types.h
+index e4adf64..9a30e4d 100644
+--- a/types.h
++++ b/types.h
+@@ -2,3 +2,4 @@ typedef unsigned int   uint;
+ typedef unsigned short ushort;
+ typedef unsigned char  uchar;
+ typedef uint pde_t;
++
+diff --git a/user.h b/user.h
+index f341021..46b19f2 100644
+--- a/user.h
++++ b/user.h
+@@ -23,6 +23,13 @@ int getpid(void);
+ char* sbrk(int);
+ int sleep(int);
+ int uptime(void);
++// miniprj-02
++int gethostname(char *);
++int sethostname(const char *);
++
++// prj 01 extra
++int nicevalueup(void);
++int nicevaluedown(void);
+ 
+ // ulib.c
+ int stat(const char*, struct stat*);
+diff --git a/usys.S b/usys.S
+index 8bfd8a1..5d97dcc 100644
+--- a/usys.S
++++ b/usys.S
+@@ -29,3 +29,7 @@ SYSCALL(getpid)
+ SYSCALL(sbrk)
+ SYSCALL(sleep)
+ SYSCALL(uptime)
++SYSCALL(gethostname)
++SYSCALL(sethostname)
++SYSCALL(nicevalueup)
++SYSCALL(nicevaluedown)

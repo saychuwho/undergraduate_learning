@@ -1,0 +1,479 @@
+diff --git a/bio.c b/bio.c
+index f4cb37c..0c79b14 100644
+--- a/bio.c
++++ b/bio.c
+@@ -108,6 +108,85 @@ bread(uint dev, uint blockno)
+     return b;
+ 
+   //TODO implement here
++
++  // debug
++  //cprintf("bread called with b->blockno %d\n", b->blockno);
++  
++  // RAID 5
++  // first, get physical disk location of b->blockno
++  struct buf *parity_block;
++  int block_0_no = 0;
++  int block_1_no = 0;
++  int block_diskno = 0;
++  int block_diskno_another = 0;
++  int block_offset = b->blockno;
++
++  // calculate parity block, raid block disk location
++  if(b->blockno >= FSSIZE)
++    block_offset = b->blockno - FSSIZE;
++  
++  int parityno = block_offset % 3;
++  switch(parityno){
++    case 0:
++      block_0_no = 1;
++      block_1_no = 2;
++      break;
++    case 1:
++      block_0_no = 0;
++      block_1_no = 2;
++      break;
++    case 2:
++      block_0_no = 0;
++      block_1_no = 1;
++      break;
++  }
++
++  // calculate blockno disk location
++  // disk block location : block_offset + (FSSIZE * block_diskno)
++  if(b->blockno < FSSIZE){
++    block_diskno = block_0_no;
++    block_diskno_another = block_1_no;
++  }
++  else{
++    block_diskno = block_1_no;
++    block_diskno_another = block_0_no;
++  }
++
++  // debug
++  //cprintf("> block_diskno : %d block_diskno_another : %d parityno : %d\n", block_diskno, block_diskno_another, parityno);
++
++  // second, read block from disk. 
++  // if block is broken disk, recover data with parity block
++  if(BROKEN_DISK == block_diskno){
++    b2 = bget_direct(b->dev, block_offset + (FSSIZE * block_diskno_another));
++    parity_block = bget_direct(b->dev, block_offset + (FSSIZE * parityno));
++
++    iderw(b2);
++    iderw(parity_block);
++
++    for(int i=0;i<BSIZE/sizeof(int); i++)
++      b->udata[i] = b2->udata[i] ^ parity_block->udata[i];
++    
++    brelse(b2);
++    brelse(parity_block);
++
++    b->flags |= B_VALID;
++  }
++  // if block is not broken, read from block. we need to consider block offset
++  else{
++    b2 = bget_direct(b->dev, block_offset + (FSSIZE * block_diskno));
++    iderw(b2);
++
++    for(int i=0;i<BSIZE/sizeof(int); i++)
++      b->udata[i] = b2->udata[i];
++    
++    brelse(b2);
++
++    b->flags |= B_VALID;
++  }
++
++  
++  /* RAID 1
+   if (BROKEN_DISK == 0) {
+     b2 = bget_direct(b->dev, b->blockno + FSSIZE);
+     iderw(b2); //read
+@@ -120,6 +199,7 @@ bread(uint dev, uint blockno)
+   } else {
+     iderw(b); //read
+   }
++  */
+ 
+   return b;
+ }
+@@ -134,6 +214,158 @@ bwrite(struct buf *b)
+     panic("bwrite");
+ 
+   //TODO implement here
++  // debug
++  //cprintf("bwrite called with b->blockno%d\n", b->blockno);
++  
++  // RAID 5
++  // first, get physical disk location of b->blockno
++  struct buf *parity_block, *b_clean;
++  int block_0_no = 0;
++  int block_1_no = 0;
++  int block_diskno = 0;
++  int block_diskno_another = 0;
++  int block_offset = b->blockno;
++
++  // calculate parity block, raid block disk location
++  if(b->blockno >= FSSIZE)
++    block_offset = b->blockno - FSSIZE;
++  
++  int parityno = block_offset % 3;
++
++  switch(parityno){
++    case 0:
++      block_0_no = 1;
++      block_1_no = 2;
++      break;
++    case 1:
++      block_0_no = 0;
++      block_1_no = 2;
++      break;
++    case 2:
++      block_0_no = 0;
++      block_1_no = 1;
++      break;
++  }
++
++  // calculate blockno disk location
++  // disk block location : block_offset + (FSSIZE * block_diskno)
++  if(b->blockno < FSSIZE){
++    block_diskno = block_0_no;
++    block_diskno_another = block_1_no;
++  }
++  else{
++    block_diskno = block_1_no;
++    block_diskno_another = block_0_no;
++  }
++
++  // debug
++  //cprintf("& block_diskno : %d block_diskno_another : %d parityno : %d\n", block_diskno, block_diskno_another, parityno);
++
++  // recover the broken parityno and write
++  // but, it is not needed because we cannot write parity block. 
++  // just write the b into disk
++  if(BROKEN_DISK == parityno){
++
++    b_clean = bget_direct(b->dev, block_offset + (FSSIZE * block_diskno));
++    // same as bread, we need to make duplicate due to block_diskno
++    for(int i=0;i<BSIZE/sizeof(int);i++){
++      b_clean->udata[i] = b->udata[i];
++    }
++
++    b_clean->flags |= B_DIRTY;
++    iderw(b_clean);
++    brelse(b_clean);
++  }
++
++  // recover the broken block_diskno_another and write parity block, b
++  else if(BROKEN_DISK == block_diskno_another){
++    b_clean = bget_direct(b->dev, block_offset + (FSSIZE * block_diskno));
++    b2 = bget_direct(b->dev, block_offset + (FSSIZE * block_diskno_another));
++    parity_block = bget_direct(b->dev, block_offset + (FSSIZE * parityno));
++
++    iderw(b_clean);
++    iderw(parity_block);
++
++    // recover broken parity block & calculate new parity_block
++    for(int i=0; i<BSIZE/sizeof(int);i++){
++      b2->udata[i] = b_clean->udata[i] ^ parity_block->udata[i];
++    }
++
++    for(int i=0;i<BSIZE/sizeof(int);i++){
++      parity_block->udata[i] = b->udata[i] ^ b2->udata[i];
++    }
++
++    // same as bread, we need to make duplicate due to block_diskno
++    for(int i=0;i<BSIZE/sizeof(int);i++){
++      b_clean->udata[i] = b->udata[i];
++    }
++
++    // write parity block & b_clean
++    b_clean->flags |= B_DIRTY;
++    iderw(b_clean);
++    brelse(b_clean);
++
++    parity_block->flags |= B_DIRTY;
++    iderw(parity_block);
++    brelse(parity_block);
++
++    brelse(b2);
++  }
++  // just read the b_diskno_another and write the new parity block
++  else if(BROKEN_DISK == block_diskno){
++    b2 = bget_direct(b->dev, block_offset + (FSSIZE * block_diskno_another));
++    parity_block = bget_direct(b->dev, block_offset + (FSSIZE * parityno));
++
++    iderw(b2);
++
++    // calculate new parity block
++    for(int i=0;i<BSIZE/sizeof(int);i++)
++      parity_block->udata[i] = b->udata[i] ^ b2->udata[i];
++
++    brelse(b2);
++
++    // write parity block
++    parity_block->flags |= B_DIRTY;
++    iderw(parity_block);
++    brelse(parity_block);
++  }
++  // nothing is broken, so write new b, parity_block
++  else{
++    b_clean = bget_direct(b->dev, block_offset + (FSSIZE * block_diskno));
++    b2 = bget_direct(b->dev, block_offset + (FSSIZE * block_diskno_another));
++    parity_block = bget_direct(b->dev, block_offset + (FSSIZE * parityno));
++    
++    iderw(b2);
++
++    // calculate new parity block
++    for(int i=0;i<BSIZE/sizeof(int);i++)
++      parity_block->udata[i] = b->udata[i] ^ b2->udata[i];
++
++    // same as bread, we need to make duplicate due to block_diskno
++    for(int i=0;i<BSIZE/sizeof(int);i++){
++      b_clean->udata[i] = b->udata[i];
++    }
++
++    brelse(b2);
++
++    // write parity block & b
++    parity_block->flags |= B_DIRTY;
++
++    iderw(parity_block);
++    brelse(parity_block);
++
++    b_clean->flags |= B_DIRTY;
++    iderw(b_clean);
++    brelse(b_clean);
++
++  }
++  
++  // b->flags도 dirty로 만들어줘야 한다. 원래 buffer이니까
++  b->flags |= B_DIRTY;
++
++
++  /*
++  // RAID 1
+   if (BROKEN_DISK != 1) {
+     b2 = bget_direct(b->dev, b->blockno + FSSIZE);
+ 
+@@ -146,6 +378,7 @@ bwrite(struct buf *b)
+   }
+   b->flags |= B_DIRTY;
+   iderw(b); //write
++  */
+ }
+ 
+ // Release a locked buffer.
+diff --git a/ide.c b/ide.c
+index 960ba5d..9223059 100644
+--- a/ide.c
++++ b/ide.c
+@@ -75,8 +75,16 @@ idestart(struct buf *b)
+ {
+   if(b == 0)
+     panic("idestart");
++
++  /* RAID 1
+   if(b->blockno >= FSSIZE*2)
+     panic("incorrect blockno");
++  */
++
++  // RAID 5 : prj 3 >> disk size 3000
++  if(b->blockno >= FSSIZE * 3)
++    panic("incorrect blockno");
++
+   int sector_per_block =  BSIZE/SECTOR_SIZE;
+   int sector = b->blockno * sector_per_block;
+   int read_cmd = (sector_per_block == 1) ? IDE_CMD_READ :  IDE_CMD_RDMUL;
+diff --git a/mkfs_2.c b/mkfs_2.c
+index f41f2d6..50d17af 100644
+--- a/mkfs_2.c
++++ b/mkfs_2.c
+@@ -11,8 +11,8 @@
+ 
+ int main(int argc, char *argv[])
+ {
+-	unsigned char buf[BSIZE];
+-	int ret;
++	//unsigned char buf[BSIZE];
++	//int ret;
+ 	int rdfd = open(argv[1], O_RDONLY);
+ 	if (rdfd < 0) {
+ 		perror("rdfd open");
+@@ -25,9 +25,116 @@ int main(int argc, char *argv[])
+ 	}
+ 
+ 	//TODO implement here
++	// RAID 5
++	ftruncate(wrfd, (FSSIZE * 3) * BSIZE);
++
++	unsigned char buf_1[BSIZE];
++	unsigned char buf_2[BSIZE];
++	unsigned char parity_block[BSIZE];
++	int ret_1;
++	int ret_2;
++	int ret_3;
++	for(int blockno = 0;blockno < FSSIZE; blockno++){
++		// first, read A1 (0 ~ 999), A2 (1000 ~ 2000) from tmp.img
++		ret_1 = pread(rdfd, buf_1, BSIZE, (BSIZE*blockno));
++		//if (ret_1 == 0) // potential error occur in here..... if A2 is exist when after A1?
++		//	break;
++		if (ret_1 != BSIZE) {
++			perror("pread");
++			exit(1);
++		}
++
++		// buf_2에 해당하는 내용이 없다!
++		/*
++		ret_2 = pread(rdfd, buf_2, BSIZE, (BSIZE*(blockno + FSSIZE)));
++		if(ret_2 == 0) // potential error occur in here..... if A2 is exist when after A1?
++			break;
++		if(ret_2 != BSIZE){
++			perror("pread");
++			exit(1);
++		}
++		*/
++
++		// second, make parity block with buf_1, buf_2(해당하는 내용이 없으니 그냥 ^ 0을 한다)
++		// buf_2에는 0을 집어넣자
++		for(int i=0;i<BSIZE;i++){
++			buf_2[i] = 0;
++			parity_block[i] = buf_1[i] ^ buf_2[i];
++		}
++
++		// third, put parity block, raid block with modular calculation
++		int parity_index = blockno % 3;
++		switch(parity_index){
++			case 0:
++				// parity_block >> DISK 0
++				ret_1 = pwrite(wrfd, parity_block, BSIZE, (BSIZE * blockno));
++				if (ret_1 != BSIZE) {
++					perror("pwrite1");
++					exit(1);
++				}
++				// 0~999 >> DISK 1
++				ret_2 = pwrite(wrfd, buf_1, BSIZE, (blockno + FSSIZE) * BSIZE);
++				if (ret_2 != BSIZE) {
++					perror("pwrite2");
++					exit(1);
++				}
++				// 1000~1999 >> DISK 3
++				ret_3 = pwrite(wrfd, buf_2, BSIZE, (blockno + FSSIZE*2) * BSIZE);
++				if (ret_3 != BSIZE) {
++					perror("pwrite3");
++					exit(1);
++				}
++				break;
++			case 1:
++				// 0~999 >> DISK 0
++				ret_1 = pwrite(wrfd, buf_1, BSIZE, (BSIZE * blockno));
++				if (ret_1 != BSIZE) {
++					perror("pwrite1");
++					exit(1);
++				}
++				// parity_block >> DISK 1
++				ret_2 = pwrite(wrfd, parity_block, BSIZE, (blockno + FSSIZE) * BSIZE);
++				if (ret_2 != BSIZE) {
++					perror("pwrite2");
++					exit(1);
++				}
++				// 1000~1999 >> DISK 3
++				ret_3 = pwrite(wrfd, buf_2, BSIZE, (blockno + FSSIZE*2) * BSIZE);
++				if (ret_3 != BSIZE) {
++					perror("pwrite3");
++					exit(1);
++				}
++				break;
++			case 2:
++				// 0~999 >> DISK 0
++				ret_1 = pwrite(wrfd, buf_1, BSIZE, (BSIZE * blockno));
++				if (ret_1 != BSIZE) {
++					perror("pwrite1");
++					exit(1);
++				}
++				// 1000~1999 >> DISK 1
++				ret_2 = pwrite(wrfd, buf_2, BSIZE, (blockno + FSSIZE) * BSIZE);
++				if (ret_2 != BSIZE) {
++					perror("pwrite2");
++					exit(1);
++				}
++				// parity_block >> DISK 3
++				ret_3 = pwrite(wrfd, parity_block, BSIZE, (blockno + FSSIZE*2) * BSIZE);
++				if (ret_3 != BSIZE) {
++					perror("pwrite3");
++					exit(1);
++				}
++				break;
++		}
++	}
++
++	/*
++	// RAID 1
+ 	ftruncate(wrfd, (FSSIZE * 2) * BSIZE);
+ 
++	// RAID 1 : read block from tmp.img and write to fs.img
+ 	for (int blockno = 0; blockno < FSSIZE; blockno++) {
++		// tmp.img read
+ 		ret = pread(rdfd, buf, BSIZE, (BSIZE * blockno));
+ 		if (ret == 0)
+ 			break;
+@@ -35,17 +142,22 @@ int main(int argc, char *argv[])
+ 			perror("pread");
+ 			exit(1);
+ 		}
++		// tmp.img >> DISK 0
+ 		ret = pwrite(wrfd, buf, BSIZE, (BSIZE * blockno));
+ 		if (ret != BSIZE) {
+ 			perror("pwrite1");
+ 			exit(1);
+ 		}
++		// tmp.img >> DISK 1
+ 		ret = pwrite(wrfd, buf, BSIZE, (blockno + FSSIZE) * BSIZE);
+ 		if (ret != BSIZE) {
+ 			perror("pwrite2");
+ 			exit(1);
+ 		}
+ 	}
++	*/
++
++
+ 	close(rdfd);
+ 	close(wrfd);
+ }
+diff --git a/param.h b/param.h
+index a7e90ef..cc4c42e 100644
+--- a/param.h
++++ b/param.h
+@@ -9,6 +9,6 @@
+ #define MAXARG       32  // max exec arguments
+ #define MAXOPBLOCKS  10  // max # of blocks any FS op writes
+ #define LOGSIZE      (MAXOPBLOCKS*3)  // max data blocks in on-disk log
+-#define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
+-#define FSSIZE       1000  // size of file system in blocks
++#define NBUF         (MAXOPBLOCKS*30)  // size of disk block cache // prj 3 modified
+ 
++#define FSSIZE       1000  // size of file system in blocks // RAID 1, RAID 5 prj 3
+diff --git a/usertests.c b/usertests.c
+index 7b6492f..6d05d9a 100644
+--- a/usertests.c
++++ b/usertests.c
+@@ -590,6 +590,10 @@ createdelete(void)
+   printf(1, "createdelete test\n");
+ 
+   for(pi = 0; pi < 4; pi++){
++    
++    // debug
++    //printf(1, "forked\n");
++
+     pid = fork();
+     if(pid < 0){
+       printf(1, "fork failed\n");
+@@ -620,6 +624,9 @@ createdelete(void)
+   }
+ 
+   for(pi = 0; pi < 4; pi++){
++    // debug
++    //printf(1, "waiting\n");
++
+     wait();
+   }
+ 

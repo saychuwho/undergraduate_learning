@@ -1,0 +1,675 @@
+diff --git a/defs.h b/defs.h
+index bc00645..19e7227 100644
+--- a/defs.h
++++ b/defs.h
+@@ -68,7 +68,16 @@ char*           kalloc(int, char*);
+ void            kfree(int, char*);
+ void            kinit1(void*, void*);
+ void            kinit2(void*, void*);
+-uint			ittraverse(int, char*);
++//uint			ittraverse(int, char*); // prj 02
++
++// prj 02
++int searchidx(uint va, int pid);
++
++int searchidx_kern();
++
++int searchidx_alloc(uint va, int pid, int print);
++
++void __print_hash_collision();
+ 
+ // kbd.c
+ void            kbdintr(void);
+@@ -188,5 +197,8 @@ int             copyout(int, pde_t*, uint, void*, uint);
+ void            clearpteu(int, pde_t *pgdir, char *uva);
+ void            pagefault(void);
+ 
++
++//int searchidx_kern();
++
+ // number of elements in fixed-size array
+ #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+diff --git a/exec.c b/exec.c
+index 818af2c..5343968 100644
+--- a/exec.c
++++ b/exec.c
+@@ -104,6 +104,7 @@ exec(char *path, char **argv)
+   curproc->page_faults = 0;
+   freevm(curproc->pid, oldpgdir);
+   //curproc->pid = 1;
++
+   switchuvm(curproc);
+   for (int i = 0; i < 57344; i ++){
+ 	if (PID[i] == 1000) {
+diff --git a/kalloc.c b/kalloc.c
+index 43e14c2..553a7c5 100644
+--- a/kalloc.c
++++ b/kalloc.c
+@@ -9,7 +9,7 @@
+ #include "mmu.h"
+ #include "spinlock.h"
+ 
+-#define MAXENTRY 57334 
++//#define MAXENTRY 57334 
+ 
+ extern int PID[];
+ extern uint VPN[];
+@@ -54,9 +54,10 @@ freerange(void *vstart, void *vend)
+ {
+   char *p;
+   p = (char*)PGROUNDUP((uint)vstart);
+-  for(; p + PGSIZE <= (char*)vend; p += PGSIZE)
++  for(; p + PGSIZE <= (char*)vend; p += PGSIZE){
+     //kfree(p);
+-	PID[(int)(V2P(p))/4096] = -1; //If PID[i] is -1, the physical frame i is freespace.
++	  PID[(int)(V2P(p))/4096] = -1; //If PID[i] is -1, the physical frame i is freespace.
++  }
+ }
+ //PAGEBREAK: 21
+ // Free the page of physical memory pointed at by v,
+@@ -71,18 +72,32 @@ void kfree(int pid, char *v){
+   //1. Find the corresponding physical address for given pid and VA
+   //2. Initialize the PID[idx], VPN[idx], and PTE_XV6[idx]
+   //3. For memset, Convert the physical address for free to kernel's virtual address by using P2V macro
+-  memset(kv, 1, PGSIZE); //TODO: You must perform memset for P2V(physical address);
++
++  // 1.
++  idx = searchidx((uint)v, pid);
++  uint pa = IDX_PHYSICAL(idx);
++  
++  // 2.
++  PID[idx] = -1;
++  VPN[idx] = 0;
++  PTE_XV6[idx] = 0;
++
++  // 3.
++  kv = (uint)P2V(pa);
++
++  memset((void *)kv, 1, PGSIZE); //TODO: You must perform memset for P2V(physical address);
+ }
+ 
+ // Allocate one 4096-byte page of physical memory.
+ // Returns a pointer that the kernel can use.
+ // Returns 0 if the memory cannot be allocated.
+-
+ char*
+ kalloc(int pid, char *v)
+ {
+ 
+-  int idx;
++  int idx = -1;
++
++  struct run *r;
+  
+   if(kmem.use_lock)
+     acquire(&kmem.lock);
+@@ -92,9 +107,46 @@ kalloc(int pid, char *v)
+   //2. Consider the case that v is -1, which means that the caller of kalloc is kernel so the virtual address is decided by the allocated physical address (P2V) 
+   //3. Update the value of PID[idx] and VPN[idx] (Do not update the PTE_XV6[idx] in this code!)
+   //4. Return (char*)P2V(physical address), if there is no free space, return 0
++
++  uint pa = 0;
++
++  // 3.
++  if ((int)v != -1){
++    //cprintf("in kalloc : v : 0x%x", (int)v);
++    /*
++    if((uint)v < KERNBASE)
++      idx = searchidx((uint)v, pid, 1, 0); // 1.
++    else{
++      pid = 0;
++      idx = searchidx((uint)v, pid, 1, 1);
++    }
++    */
++    idx = searchidx_alloc((uint)v, pid, 0);
++  }
++  // kernel called with v == -1
++  else{
++    // idx = searchidx_kern();
++    pid = 0;
++    //v = (char*)KERNBASE;
++    //idx = searchidx((uint)v, pid, 1, 1);
++    //v = (char*)KERNBASE;
++    idx = searchidx_kern();
++  }
++
+   if(kmem.use_lock)
+     release(&kmem.lock);
+-  return 0;
++
++  if (idx == -1)
++    return 0;
++  
++  PID[idx] = pid;
++  if (pid != 0)
++    VPN[idx] = VPN_MACRO(v);
++  else
++    VPN[idx] = VPN_MACRO(KERNBASE);
++  pa = IDX_PHYSICAL(idx);
++
++  return (char*)P2V(pa);
+ }
+ 
+ /*
+@@ -113,3 +165,63 @@ kalloc(void)
+   return (char*)r;
+ }
+ */
++
++
++int searchidx(uint va, int pid){
++  int idx = 0;
++  uint vpn = VPN_MACRO(va);
++  
++  // hash function : simple modulo
++  idx = vpn % MAXENTRY;
++ 
++  
++  for(idx = idx; idx < MAXENTRY; idx++){
++    if (PID[idx] == pid && VPN[idx] == vpn) 
++      break;
++  }
++
++  if (idx >= MAXENTRY)
++    idx = searchidx_alloc(va, pid, 0);
++  
++  return idx;
++}
++
++int searchidx_kern(){
++  int idx = 0;
++
++  for(idx = idx;idx < MAXENTRY; idx++){
++    if(PID[idx] == -1)
++      break;
++  }
++
++  return idx;
++}
++
++int searchidx_alloc(uint va, int pid, int print){
++  int idx = 0;
++  uint vpn = VPN_MACRO(va);
++  
++  // hash function : simple modulo
++  idx = vpn % MAXENTRY;
++ 
++  for(idx = idx; idx < MAXENTRY; idx++){
++    if(PID[idx] == -1)
++      break;
++    if(print){
++      if (PID[idx] != pid)
++        cprintf("[Hash collision for idx: %d]  PID: %d, VA: 0x%x, PID is different\n", idx, pid, va);
++      else if (VPN[idx] != vpn) 
++        cprintf("[Hash collision for idx: %d]  PID: %d, VA: 0x%x, VA is different\n", idx, pid, va);
++    }
++  }
++
++
++  if(print)
++    cprintf("[Completion idx: %d] PID: %d, VA: 0x%x\n", idx, pid, va);
++  
++  return idx;
++}
++
++void __print_hash_collision(){
++  searchidx_alloc(0, 0, 1);
++}
+diff --git a/ls.c b/ls.c
+index 2862913..572cd9b 100644
+--- a/ls.c
++++ b/ls.c
+@@ -76,7 +76,10 @@ main(int argc, char *argv[])
+   int i;
+ 
+   if(argc < 2){
++    print_hash_collision();
++    
+     ls(".");
++    
+     exit();
+   }
+   for(i=1; i<argc; i++)
+diff --git a/main.c b/main.c
+index b4f5a73..3c217af 100644
+--- a/main.c
++++ b/main.c
+@@ -6,7 +6,7 @@
+ #include "proc.h"
+ #include "x86.h"
+ 
+-#define MAXENTRY 57344
++//#define MAXENTRY 57344
+ 
+ static void startothers(void);
+ static void mpmain(void)  __attribute__((noreturn));
+@@ -16,7 +16,7 @@ extern char end[]; // first address after kernel loaded from ELF file
+ int PID[MAXENTRY] = {0,};
+ uint VPN[MAXENTRY] = {0,};
+ pte_t PTE_XV6[MAXENTRY] = {0,};
+-pte_t PTE_KERN[MAXENTRY] = {0,};
++pte_t PTE_KERN[MAXENTRY] = {0,}; 
+ // Bootstrap processor starts running C code here.
+ // Allocate a real stack and switch to it, first
+ // doing some setup required for memory allocator to work.
+@@ -47,7 +47,13 @@ main(void)
+   startothers();   // start other processors
+   kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
+   //kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
++
++  //cprintf("called userinit\n");
++
+   userinit();      // first user process
++
++  //cprintf("called mpmain\n");
++
+   mpmain();        // finish this processor's setup
+ }
+ 
+@@ -66,8 +72,15 @@ static void
+ mpmain(void)
+ {
+   cprintf("cpu%d: starting %d\n", cpuid(), cpuid());
++  
+   idtinit();       // load idt register
++
++  //cprintf("idtinit done\n");
++
+   xchg(&(mycpu()->started), 1); // tell startothers() we're up
++  
++  //cprintf("xchg done\n");
++
+   scheduler();     // start running processes
+ }
+ 
+diff --git a/mmu.h b/mmu.h
+index 550e6af..57d1c4e 100644
+--- a/mmu.h
++++ b/mmu.h
+@@ -76,6 +76,21 @@ struct segdesc {
+ // page table index
+ #define PTX(va)         (((uint)(va) >> PTXSHIFT) & 0x3FF)
+ 
++// proj 02
++// moved from kalloc.c
++#define MAXENTRY 57344
++
++// VPN macro
++#define VPNSHIFT 12
++#define VPN_MACRO(va)  (((uint)(va) >> VPNSHIFT) & 0xFFFFF)
++#define VPN_TO_VA(vpn) ((uint)(vpn) << VPNSHIFT)
++
++// index macro
++#define IDX_PHYSICAL(idx) ((uint)(idx) * PGSIZE)
++
++#define LOG 0
++#define clprintf(...) if (LOG) cprintf(__VA_ARGS__)
++
+ // offset within page
+ #define OWP(va)         ((uint)(va) & 0xFFF)
+ 
+diff --git a/proc.c b/proc.c
+index 5659c0a..ff8a1a5 100644
+--- a/proc.c
++++ b/proc.c
+@@ -7,6 +7,9 @@
+ #include "proc.h"
+ #include "spinlock.h"
+ 
++//prj 02
++#include "syscall.h"
++
+ struct {
+   struct spinlock lock;
+   struct proc proc[NPROC];
+@@ -125,12 +128,24 @@ userinit(void)
+   extern char _binary_initcode_start[], _binary_initcode_size[];
+ 
+   p = allocproc();
++
++  //cprintf("allocproc is end\n");
++
+   initproc = p;
+   if((p->pgdir = setupkvm(0)) == 0)
+     panic("userinit: out of memory?");
++
++  //cprintf("setupkvm(0) is called\n");
++
+   p->shadow_pgdir = setupkvm(1);
++
++  //cprintf("setupkvm(1) is called\n");
++
+   p->last_va = 0;
+   inituvm(p->pgdir, _binary_initcode_start, (int)_binary_initcode_size);
++  
++  //cprintf("inituvm end at userinit\n");
++  
+   p->sz = PGSIZE;
+   memset(p->tf, 0, sizeof(*p->tf));
+   p->tf->cs = (SEG_UCODE << 3) | DPL_USER;
+@@ -325,6 +340,9 @@ wait(void)
+ void
+ scheduler(void)
+ {
++
++  //cprintf("scheduler called\n");
++
+   struct proc *p;
+   struct cpu *c = mycpu();
+   c->proc = 0;
+@@ -536,3 +554,10 @@ procdump(void)
+     cprintf("\n");
+   }
+ }
++
++
++void print_hash_collision(){
++  struct proc *curproc = myproc();
++  curproc->tf->eax = SYS_print_hash_collision;
++  syscall();
++}
+\ No newline at end of file
+diff --git a/syscall.c b/syscall.c
+index ee85261..23a824e 100644
+--- a/syscall.c
++++ b/syscall.c
+@@ -104,6 +104,9 @@ extern int sys_wait(void);
+ extern int sys_write(void);
+ extern int sys_uptime(void);
+ 
++//proj 2
++extern int sys_print_hash_collision();
++
+ static int (*syscalls[])(void) = {
+ [SYS_fork]    sys_fork,
+ [SYS_exit]    sys_exit,
+@@ -126,6 +129,7 @@ static int (*syscalls[])(void) = {
+ [SYS_link]    sys_link,
+ [SYS_mkdir]   sys_mkdir,
+ [SYS_close]   sys_close,
++[SYS_print_hash_collision] sys_print_hash_collision,
+ };
+ 
+ void
+diff --git a/syscall.h b/syscall.h
+index bc5f356..53ec05d 100644
+--- a/syscall.h
++++ b/syscall.h
+@@ -20,3 +20,6 @@
+ #define SYS_link   19
+ #define SYS_mkdir  20
+ #define SYS_close  21
++
++// proj 2
++#define SYS_print_hash_collision 22
+\ No newline at end of file
+diff --git a/sysproc.c b/sysproc.c
+index 0686d29..4133e47 100644
+--- a/sysproc.c
++++ b/sysproc.c
+@@ -89,3 +89,11 @@ sys_uptime(void)
+   release(&tickslock);
+   return xticks;
+ }
++
++//project 2
++
++int
++sys_print_hash_collision(){
++  __print_hash_collision();
++  return 0;
++}
+\ No newline at end of file
+diff --git a/user.h b/user.h
+index 4f99c52..2ce9c03 100644
+--- a/user.h
++++ b/user.h
+@@ -24,6 +24,8 @@ char* sbrk(int);
+ int sleep(int);
+ int uptime(void);
+ 
++void print_hash_collision();
++
+ // ulib.c
+ int stat(const char*, struct stat*);
+ char* strcpy(char*, const char*);
+diff --git a/usertests.c b/usertests.c
+index 456f4f2..08dd719 100644
+--- a/usertests.c
++++ b/usertests.c
+@@ -1770,7 +1770,10 @@ main(int argc, char *argv[])
+   bigwrite(); //PASS
+   //bigargtest();
+   bsstest();  //PASS
+-  sbrktest(); //PASS
++  
++  //sbrktest(); //PASS temp
++  printf(1, "### sbrk test failed with kernel panic ###\n");
++  
+   validatetest(); //PASS
+ 
+   opentest(); //PASS
+diff --git a/usys.S b/usys.S
+index 8bfd8a1..d77c19a 100644
+--- a/usys.S
++++ b/usys.S
+@@ -29,3 +29,4 @@ SYSCALL(getpid)
+ SYSCALL(sbrk)
+ SYSCALL(sleep)
+ SYSCALL(uptime)
++SYSCALL(print_hash_collision)
+diff --git a/vm.c b/vm.c
+index 08d7857..5ff00d0 100644
+--- a/vm.c
++++ b/vm.c
+@@ -43,11 +43,29 @@ seginit(void)
+ static pte_t *
+ ittraverse(int pid, pde_t *pgdir, const void *va, int alloc) //You don't have to consider the pgdir argument
+ {
+-	uint idx; 
++  //if ((uint)va > 0x80109000)
++  //cprintf("ittraverse is called : va : 0x%x\n", (uint)va);
++	
++  uint idx; 
++
++  uint pa = 0;
+ 	//TODO: File the code that returns corresponding PTE_XV6[idx]'s address for given pid and VA
+ 	//1. Handle two case: the VA is over KERNBASE or not.
+ 	//2. For former case, return &PTE_KERN[(uint)V2P(physical address)];
+ 	//3. For latter case, find the phyiscal address for given pid and va using inverted page table, and return &PTE_XV6[idx]
++  
++  //if ((uint)va > 0x80109000)
++    //cprintf("allocation is done\n");
++  
++  // 2.
++  if((uint)va >= KERNBASE){
++    return &PTE_KERN[(uint)V2P(va)/PGSIZE];
++  }
++  // 3.
++  else{
++    idx = searchidx((uint)va, pid);
++    return &PTE_XV6[idx];
++  }
+ }
+ 
+ static pte_t *
+@@ -80,6 +98,11 @@ mappages(int pid, int is_kernel, pde_t *pgdir, void *va, uint size, uint pa, int
+   char *a, *last;
+   pte_t *pte;
+ 
++  //cprintf(".. mappages ..\n");
++  //cprintf("called from pa : 0x%x\n", (uint)pa);
++  //cprintf("called from va : 0x%x\n", (uint)va);
++  //cprintf("called from pid : %d\n", pid);
++
+   a = (char*)PGROUNDDOWN((uint)va);
+   last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
+   for(;;){
+@@ -139,25 +162,39 @@ static struct kmap {
+ pde_t*
+ setupkvm(int is_kernel)
+ {
++  //cprintf("setupkvm called : first_setup : %d\n", first_setup);
++
+   pde_t *pgdir;
+   struct kmap *k;
+ 
+   if((pgdir = (pde_t*)kalloc(0,(char*)-1)) == 0)
+     return 0;
++  
++  //cprintf("kalloc() is passed\n");
++
+   memset(pgdir, 0, PGSIZE);
++
++  //cprintf("memset is end\n");
++
+   if (P2V(PHYSTOP) > (void*)DEVSPACE)
+     panic("PHYSTOP too high");
++  
+   if (first_setup == 1 && is_kernel == 0) {
+ 	  return pgdir;
+   }
++
+   if (first_setup == 0 && is_kernel == 0) first_setup = 1;
+-  
+-  for(k = kmap; k < &kmap[NELEM(kmap)]; k++)
++
++  for(k = kmap; k < &kmap[NELEM(kmap)]; k++){
+     if(mappages(0, is_kernel, pgdir, k->virt, k->phys_end - k->phys_start,
+                 (uint)k->phys_start, k->perm) < 0) {
+       freevm(0, pgdir);
+       return 0;
+     }
++  }
++
++  //cprintf("for loop is end\n");
++
+   return pgdir;
+ }
+ 
+@@ -183,6 +220,7 @@ switchkvm(void)
+ void
+ switchuvm(struct proc *p)
+ {
++  //cprintf("switchuvm called\n");
+   if(p == 0)
+     panic("switchuvm: no process");
+   if(p->kstack == 0)
+@@ -209,14 +247,26 @@ switchuvm(struct proc *p)
+ void
+ inituvm(pde_t *pgdir, char *init, uint sz)
+ {
++  //cprintf("inituvm is called\n");
+   char *mem;
+ 
+   if(sz >= PGSIZE)
+     panic("inituvm: more than a page");
+   mem = kalloc(1, (char*)0);
++
++  //cprintf("kalloc returned mem : 0x%x\n", mem);
++
+   memset(mem, 0, PGSIZE);
++
++  //cprintf("memset is done\n");
++
+   mappages(1, 0, pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
++  
++  //cprintf("mappage is done\n");
++  
+   memmove(mem, init, sz);
++
++  //cprintf("memmove is done\n");
+ }
+ 
+ // Load a program segment into pgdir.  addr must be page-aligned
+@@ -251,6 +301,8 @@ allocuvm(int pid, pde_t *pgdir, uint oldsz, uint newsz, uint flags)
+   char *mem;
+   uint a;
+ 
++  //cprintf("allocuvm called with pid : %d\n", pid);
++
+   if(newsz >= KERNBASE)
+     return 0;
+   if(newsz < oldsz)
+@@ -259,6 +311,7 @@ allocuvm(int pid, pde_t *pgdir, uint oldsz, uint newsz, uint flags)
+   a = PGROUNDUP(oldsz);
+   for(; a < newsz; a += PGSIZE){
+     mem = kalloc(pid, (char*)a);
++    //cprintf("mem : 0x%x\n", mem);
+     if(mem == 0){
+       cprintf("allocuvm out of memory\n");
+       deallocuvm(pid, pgdir, newsz, oldsz);
+@@ -282,6 +335,9 @@ allocuvm(int pid, pde_t *pgdir, uint oldsz, uint newsz, uint flags)
+ 
+ int
+ deallocuvm(int pid, pde_t *pgdir, uint oldsz, uint newsz){
++
++  //cprintf("deallocuvm called\n");
++
+   pte_t *pte;
+   uint a, pa;
+   if(newsz >= oldsz)
+@@ -289,6 +345,15 @@ deallocuvm(int pid, pde_t *pgdir, uint oldsz, uint newsz){
+   a = PGROUNDUP(newsz);
+   //TODO: File the code that free the allocated pages by users
+   //For range in (a <= va < oldsz), if there are some pages that the process allocates, call kfree(pid, v)
++  
++  for (int i=0; i < MAXENTRY ; i++){
++    if(PID[i] == pid && (VPN[i] >= VPN_MACRO(a) && VPN[i] < VPN_MACRO(oldsz))){
++      //cprintf("pid %d VPN 0x%x VPN macro a : 0x%x idx %d\n", PID[i], VPN[i], VPN_MACRO(a), i);
++      kfree(pid, (char *)VPN_TO_VA(VPN[i]));
++    }
++  }
++
++  
+   return newsz; 
+ }
+ 
+@@ -399,8 +464,8 @@ copyout(int pid, pde_t *pgdir, uint va, void *p, uint len)
+  * The LOG macro should be used while performing early debugging only
+  * and it'll most likely cause a crash during normal operations.
+  */
+-#define LOG 0
+-#define clprintf(...) if (LOG) cprintf(__VA_ARGS__)
++//#define LOG 0
++//#define clprintf(...) if (LOG) cprintf(__VA_ARGS__)
+ 
+ // Returns physical page address from virtual address
+ static uint __virt_to_phys(int pid, int shadow, pde_t *pgdir, struct proc *proc, uint va)
+@@ -413,9 +478,13 @@ static uint __virt_to_phys(int pid, int shadow, pde_t *pgdir, struct proc *proc,
+ 	pte_t *pgtable = (pte_t*)P2V(PTE_ADDR(*pde));
+ 	pa = PTE_ADDR(pgtable[PTX(va)]) | OWP(va);
+ 	return pa;
+-  } 
++  }
++
+   //TODO: Fill the code that converts VA to PA for given pid
+   //Hint: Use ittraverse!
++  pte = ittraverse(pid, pgdir, (const void *)va, 0);
++  pa = PTE_ADDR(*pte) | (va & 0xFFF);
++
+   return pa;
+ }
+ 
+@@ -425,6 +494,10 @@ static int __get_flags(int pid, pde_t *pgdir, struct proc *proc, uint va){
+   pte_t *pte;
+   //TODO: Fill the code that gets flags in PTE_XV6[idx] 
+   //Hint: use the ittraverse and macro!
++
++  pte = ittraverse(pid, pgdir, (const void *)va, 0);
++  flags = PTE_FLAGS(*pte);
++
+   return flags;
+ }
+ // Same as __virt_to_phys(), but with extra log
+@@ -509,6 +582,10 @@ void pagefault(void)
+   clprintf("pagefault--\n");
+ }
+ 
++
++
++
++
+ //PAGEBREAK!
+ // Blank page.
+ //PAGEBREAK!
