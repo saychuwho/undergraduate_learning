@@ -4,21 +4,6 @@ This repository is place for my undergraduate codes. There are algorithm problem
 
 ## What's in here
 
-### [Baekjoon](https://www.acmicpc.net/) problem solutions
-
-   - solutions mainly written with C++, some solutions written in python or C#
-
-   - solutions are verified "success" in baekjoon scoring system
-
-### [이것이 코딩 테이스이다 with 파이썬](https://www.hanbit.co.kr/store/books/look.php?p_code=B8945183661) study
-
-- Section where I studying coding test with above book.
-- answer codes I solve will be at here.
-
-### Undergraduate Subject Assignment
-
-#### Explain
-
 - assignment code from DGIST computer science subject
 
 - WARNING : DO NOT COPY THE EXACT CODE WHEN YOU ARE DGIST UNDERGRADUATE STUDENT. IT IS ILLEGAL TO COPY SOMEONES COMPLETE CODE. PLAGIARISM IS STRICTLY CAUGHT AND YOU WILL PAY THE PRICE.
@@ -31,38 +16,43 @@ This repository is place for my undergraduate codes. There are algorithm problem
   - Computer Architecture
   - Introduction to Machine Learning
 
-#### What's In Assignment
 
-- Object-Oriented Programming
-  - team project code make ATM machine using C++
+### Object-Oriented Programming
+  
+- team project code make ATM machine using C++
 
-- System Programming
-  - make file compression program running on Raspberry Pi
-  - code is aimed to run on Raspberry Pi OS.
-  - code might not work on normal Raspberry Pi OS. Because It need custom kernel made by professor.
+### System Programming
 
-- Computer Architecture
-  - There are four assignment. All codes written in C++, aimed to run on Ubuntu 20.04.
-  - project 1 : make simple MIPS Assembler
-  - project 2 : make MIPS Instruction Emulator (might not work properly)
-  - project 3 : make single pipeline CPU can run MIPS Instructions
-  - project 4 : make cache and test with benchmark files. 
+- make file compression program running on Raspberry Pi
+- code is aimed to run on Raspberry Pi OS.
+- code might not work on normal Raspberry Pi OS. Because It need custom kernel made by professor.
 
-- Introduction to Machine Learning.
-  - I cannot remember all assignment correctly of this subject now. But they might contain these things.
-  - linear regression practice
-  - supervised learning practice using scikit-learn
-  - unsupervised learning practice using scikit-learn
+### Computer Architecture
 
-- Operating System
-  - All codes works on modified xv6 x86 version which is in [DGIST datalab](https://github.com/dgist-datalab/xv6)
-  - Every project have proper branches
-  - Project code is in .patch form.
-  - project 1 : CFS scheduler + process priority change system call / EEVDF scheduler (rbtree.c, rbtree.h from linux 2.6.23 is needed)
-  - project 2 : inverted page table (not work properly since this doesn't pass all usertests, but it boots)
-  - project 3 : RAID 5 (it requires lots of disk block cache)
+- There are four assignment. All codes written in C++, aimed to run on Ubuntu 20.04.
+- project 1 : make simple MIPS Assembler
+- project 2 : make MIPS Instruction Emulator (might not work properly)
+- project 3 : make single pipeline CPU can run MIPS Instructions
+- project 4 : make cache and test with benchmark files. 
 
-- Computer Algorithm
-  - project 3, project 4 answer code is uploaded with problems
-  - project 3 : graph algorithm, dynamic programming
-  - project 4 : greedy algorithm, min-cut max-flow theorem
+### Introduction to Machine Learning.
+
+- I cannot remember all assignment correctly of this subject now. But they might contain these things.
+- linear regression practice
+- supervised learning practice using scikit-learn
+- unsupervised learning practice using scikit-learn
+
+### Operating System
+
+- All codes works on modified xv6 x86 version which is in [DGIST datalab](https://github.com/dgist-datalab/xv6)
+- Every project have proper branches
+- Project code is in .patch form.
+- project 1 : CFS scheduler + process priority change system call / EEVDF scheduler (rbtree.c, rbtree.h from linux 2.6.23 is needed)
+- project 2 : inverted page table (not work properly since this doesn't pass all usertests, but it boots)
+- project 3 : RAID 5 (it requires lots of disk block cache)
+
+### Computer Algorithm
+
+- project 3, project 4 answer code is uploaded with problems
+- project 3 : graph algorithm, dynamic programming
+- project 4 : greedy algorithm, min-cut max-flow theorem
