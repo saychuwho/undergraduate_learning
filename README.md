@@ -10,6 +10,11 @@ This repository is place for my undergraduate codes. There are algorithm problem
 
    - solutions are verified "success" in baekjoon scoring system
 
+### [이것이 코딩 테이스이다 with 파이썬](https://www.hanbit.co.kr/store/books/look.php?p_code=B8945183661) study
+
+- Section where I studying coding test with above book.
+- answer codes I solve will be at here.
+
 ### Undergraduate Subject Assignment
 
 #### Explain
