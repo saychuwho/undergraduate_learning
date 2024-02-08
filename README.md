@@ -33,13 +33,13 @@ WARNING : DO NOT COPY THE EXACT CODE WHEN YOU ARE DGIST UNDERGRADUATE STUDENT. I
 
 ### Object-Oriented Programming
 
-"ATM 기기 만들기" 팀 프로젝트 코드입니다.
+"ATM 기기 만들기" 팀 프로젝트 코드입니다. / 블로그 설명
 
 Team project code make ATM machine using C++
 
 ### System Programming
 
-라즈베리 파이 OS에서 구동되는 파일 압축 프로그램입니다. 
+라즈베리 파이 OS에서 구동되는 파일 압축 프로그램입니다. / 블로그 설명
 
 Make file compression program running on Raspberry Pi. Code is aimed to run on Raspberry Pi OS.
 
@@ -54,10 +54,10 @@ Make file compression program running on Raspberry Pi. Code is aimed to run on R
 
 There are four assignment. All codes written in C++, aimed to run on Ubuntu 20.04.
 
-- project 1 / 블로그 설명 : make simple MIPS Assembler
-- project 2 / 블로그 설명 : make MIPS Instruction Emulator (might not work properly)
-- project 3 / 블로그 설명 : make single pipeline CPU can run MIPS Instructions
-- project 4 / 블로그 설명 : make cache and test with benchmark files. 
+- project 1 : make simple MIPS Assembler
+- project 2 : make MIPS Instruction Emulator (might not work properly)
+- project 3 : make single pipeline CPU can run MIPS Instructions
+- project 4 : make cache and test with benchmark files. 
 
 ### Introduction to Machine Learning.
 
@@ -77,9 +77,9 @@ There are four assignment. All codes written in C++, aimed to run on Ubuntu 20.0
 
 All codes works on modified xv6 x86 version which is in [DGIST datalab](https://github.com/dgist-datalab/xv6). Every project have proper branches. Project code is in .patch form.
 
-- project 1 / 블로그 설명 : CFS scheduler + process priority change system call / EEVDF scheduler (rbtree.c, rbtree.h from linux 2.6.23 is needed)
-- project 2 / 블로그 설명 : inverted page table (not work properly since this doesn't pass all usertests, but it boots)
-- project 3 / 블로그 설명 : RAID 5 (it requires lots of disk block cache)
+- project 1 : CFS scheduler + process priority change system call / EEVDF scheduler (rbtree.c, rbtree.h from linux 2.6.23 is needed)
+- project 2 : inverted page table (not work properly since this doesn't pass all usertests, but it boots)
+- project 3 : RAID 5 (it requires lots of disk block cache)
 
 ### Computer Algorithm
 
