@@ -48,7 +48,7 @@ Make file compression program running on Raspberry Pi. Code is aimed to run on R
 네 개의 프로젝트가 있습니다. 모든 코드는 C++로 작성되었습니다. Ubuntu 20.04, g++ 9.4.0 환경에서 제작했습니다
 
 - Project 1 / [블로그 설명](https://saychuwho.tistory.com/entry/Undergraduate-ProjectComputer-Architecture-1-Project-1-%EA%B0%84%EB%8B%A8%ED%95%9C-MIPS-Assembler) : 간단한 MIPS 어셈블러
-- Project 2 / 블로그 설명 : MIPS Instruction Emulator
+- Project 2 / [블로그 설명](https://saychuwho.tistory.com/entry/Undergraduate-ProjectComputer-Architecture-2-Project-2-MIPS-Instruction-Emulator) : MIPS Instruction Emulator
 - Project 3 / 블로그 설명 : MIPS single pipeline CPU
 - Project 4 / 블로그 설명 : L1, L2 Cache와 벤치마크
 

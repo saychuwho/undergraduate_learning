@@ -132,10 +132,7 @@ void doInstr_J(string op, string target){
     // 주소는 target*4에 PC에서 사용되는 상위 4비트를 더하도록 구현해야 한다.
     unsigned int tmp_op = stoul(op, nullptr, 2);
     unsigned int tmp_target = stoul(target, nullptr, 2);
-    bitset<28> bitAddr(tmp_target*4);
-    bitset<32> bitPC(PC);
-    string temp_addr = bitPC.to_string().substr(4) + bitAddr.to_string();
-    unsigned int addr = stoul(temp_addr, nullptr, 2);
+    unsigned int addr = (PC & 0xff000000) | (tmp_target*4);
     if(tmp_op == 2){ // j 형식
         PC = addr;
     }
