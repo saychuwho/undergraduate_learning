@@ -69,11 +69,15 @@ There are four assignment. All codes written in C++, aimed to run on Ubuntu 20.0
 
 ### Operating System
 
-모든 코드들은 [DGIST datalab/xv6](https://github.com/dgist-datalab/xv6)에 있는 수정된 xv6에서 돌아갑니다. 각 프로젝트 별 branch가 있어 해당 branch xv6에서만 동작합니다. 코드들은 .patch 형태로 올렸습니다.
+모든 코드들은 [DGIST datalab/xv6](https://github.com/dgist-datalab/xv6)에 있는 수정된 xv6에서 돌아갑니다. 각 프로젝트 별 branch가 있어 해당 branch xv6에서만 동작합니다. 코드들은 .patch 형태로 올렸습니다. 또한, [별도의 repository](https://github.com/saychuwho/DGIST_OS_projects_xv6/)에 동작 가능한 형태로 코드를 업데이트 해뒀습니다.
 
-- Project 1 / 블로그 설명 : CFS 스케쥴러와 프로세스 우선 순위 조정 system call / EEVDF 스케쥴러 (둘 다 linux 커널 2.6.23에 있는 [rbtree.c](https://github.com/torvalds/linux/blob/v2.6.23/lib/rbtree.c), [rbtree.h](https://github.com/torvalds/linux/blob/v2.6.23/include/linux/rbtree.h)가 필요하다.)
-- Project 2 / 블로그 설명 : Inverted page table (모든 usertest를 통과하지는 못했지만, 부팅은 한다)
-- Project 3 / 블로그 설명 : RAID 5 (disk block cache 양이 많이 필요하다)
+- How to run code
+  - 모든 코드들은 Ubuntu 20.04에서 실행 가능합니다.
+  - 다음 명령어를 이용해 xv6를 부팅할 수 있습니다. `make clean; make qemu-nox -j`
+
+- Project 1 / 블로그 설명 / [code](https://github.com/saychuwho/DGIST_OS_projects_xv6/tree/miniprj-2023) : CFS 스케쥴러와 프로세스 우선 순위 조정 system call / EEVDF 스케쥴러 (둘 다 linux 커널 2.6.23에 있는 [rbtree.c](https://github.com/torvalds/linux/blob/v2.6.23/lib/rbtree.c), [rbtree.h](https://github.com/torvalds/linux/blob/v2.6.23/include/linux/rbtree.h)가 필요하다.)
+- Project 2 / 블로그 설명 / [code](https://github.com/saychuwho/DGIST_OS_projects_xv6/tree/inverted) : Inverted page table (모든 usertest를 통과하지는 못했지만, 부팅은 한다.)
+- Project 3 / 블로그 설명 / [code](https://github.com/saychuwho/DGIST_OS_projects_xv6/tree/raid) : RAID 5 (disk block cache 양이 많이 필요하다)
 
 All codes works on modified xv6 x86 version which is in [DGIST datalab](https://github.com/dgist-datalab/xv6). Every project have proper branches. Project code is in .patch form.
 
