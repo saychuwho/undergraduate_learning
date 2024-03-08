@@ -4,6 +4,19 @@
 
 This repository is place for my undergraduate codes. There are undergraduate subject assignments.
 
+## Table
+
+- [UNDERGRATUATE LEARNING](#undergratuate-learning)
+  - [Table](#table)
+  - [What's in here](#whats-in-here)
+  - [Object-Oriented Programming](#object-oriented-programming)
+  - [System Programming](#system-programming)
+  - [Computer Architecture](#computer-architecture)
+  - [Reinforcement Learning](#reinforcement-learning)
+  - [Introduction to Machine Learning](#introduction-to-machine-learning)
+  - [Operating System](#operating-system)
+  - [Computer Algorithm](#computer-algorithm)
+
 ## What's in here
 
 DGIST Computer Science 학부 과목 프로젝트 코드들이 있습니다.
@@ -31,26 +44,28 @@ WARNING : DO NOT COPY THE EXACT CODE WHEN YOU ARE DGIST UNDERGRADUATE STUDENT. I
   - Computer Algorithm
 
 
-### Object-Oriented Programming
+## Object-Oriented Programming
 
-"ATM 기기 만들기" 팀 프로젝트 코드입니다. / 블로그 설명
+"ATM 기기 만들기" 팀 프로젝트 코드입니다. / 블로그 설명 / [code](/Object_Oriented_Programming/final_source_code.cpp)
+
+저는 대략적인 클래스 구조와, Atm 기계의 session 부분을 작성했습니다.
 
 Team project code make ATM machine using C++
 
-### System Programming
+## System Programming
 
-라즈베리 파이 OS에서 구동되는 파일 압축 프로그램입니다. / 블로그 설명
+라즈베리 파이 OS에서 구동되는 파일 압축 프로그램입니다. / 블로그 설명 / [code](/System_Programming/main.c)
 
 Make file compression program running on Raspberry Pi. Code is aimed to run on Raspberry Pi OS.
 
-### Computer Architecture
+## Computer Architecture
 
 네 개의 프로젝트가 있습니다. 모든 코드는 C++로 작성되었습니다. Ubuntu 20.04, g++ 9.4.0 환경에서 제작했습니다
 
-- Project 1 / [블로그 설명](https://velog.io/@saychuwho/Project-1-%EA%B0%84%EB%8B%A8%ED%95%9C-MIPS-Assembler) : 간단한 MIPS 어셈블러
-- Project 2 / [블로그 설명](https://velog.io/@saychuwho/Project-1-%EA%B0%84%EB%8B%A8%ED%95%9C-MIPS-Assembler) : MIPS Instruction Emulator
-- Project 3 / 블로그 설명 : MIPS single pipeline CPU
-- Project 4 / 블로그 설명 : L1, L2 Cache와 벤치마크
+- [Project 1](/Computer_Architecture/project1/) / [블로그 설명](https://velog.io/@saychuwho/Project-1-%EA%B0%84%EB%8B%A8%ED%95%9C-MIPS-Assembler) : 간단한 MIPS 어셈블러
+- [Project 2](/Computer_Architecture/project2/) / [블로그 설명](https://velog.io/@saychuwho/Project-1-%EA%B0%84%EB%8B%A8%ED%95%9C-MIPS-Assembler) : MIPS Instruction Emulator
+- [Project 3](/Computer_Architecture/project3/) / 블로그 설명 : MIPS single pipeline CPU
+- [Project 4](/Computer_Architecture/project4/) / 블로그 설명 : L1, L2 Cache와 벤치마크
 
 There are four assignment. All codes written in C++, aimed to run on Ubuntu 20.04.
 
@@ -59,15 +74,20 @@ There are four assignment. All codes written in C++, aimed to run on Ubuntu 20.0
 - project 3 : make single pipeline CPU can run MIPS Instructions
 - project 4 : make cache and test with benchmark files. 
 
-### Introduction to Machine Learning.
+## Reinforcement Learning
+
+강화학습 팀 프로젝트는 제 다른 리포지토리인 [saychuwho/TStarBot1](https://github.com/saychuwho/TStarBot1)에 있습니다.
+
+## Introduction to Machine Learning
 
 다음 코드들이 jupyter notebook 형태로 있습니다
 
-- linear regression practice
-- supervised learning practice using scikit-learn
-- unsupervised learning practice using scikit-learn
+- linear regression practice: [code](/Introduction_To_Machine_Learning/assignment1.ipynb)
+- supervised learning practice using scikit-learn: [Logistic regression](/Introduction_To_Machine_Learning/assignment2_code_LogisticRegression.ipynb) / [KNN](/Introduction_To_Machine_Learning/assignment2_code_KNN.ipynb) / [Random forest](/Introduction_To_Machine_Learning/assignment2_code_RandomForest.ipynb) / [SVM](/Introduction_To_Machine_Learning/assignment2_code_SVM.ipynb) / [Gradient Boosting](/Introduction_To_Machine_Learning/assignment2_code_GradientBoosting.ipynb)
+- unsupervised learning practice using scikit-learn: [Question 1](/Introduction_To_Machine_Learning/assignment3_question1.ipynb) / [Question 2](/Introduction_To_Machine_Learning/assignment3_question2_8.ipynb)
+- collaborative filtering 실습: [code](/Introduction_To_Machine_Learning/assignment4_part-1-item-item-recommender.ipynb)
 
-### Operating System
+## Operating System
 
 모든 코드들은 [DGIST datalab/xv6](https://github.com/dgist-datalab/xv6)에 있는 수정된 xv6에서 돌아갑니다. 각 프로젝트 별 branch가 있어 해당 branch xv6에서만 동작합니다. 코드들은 .patch 형태로 올렸습니다. 또한, [별도의 repository](https://github.com/saychuwho/DGIST_OS_projects_xv6/)에 동작 가능한 형태로 코드를 업데이트 해뒀습니다.
 
@@ -85,12 +105,12 @@ All codes works on modified xv6 x86 version which is in [DGIST datalab](https://
 - project 2 : inverted page table (not work properly since this doesn't pass all usertests, but it boots)
 - project 3 : RAID 5 (it requires lots of disk block cache)
 
-### Computer Algorithm
+## Computer Algorithm
 
 다음 알고리즘 문제들 solution이 있다
 
-- Project 3 / 블로그 설명 : 그래프 알고리즘, 다이나믹 프로그래밍
-- Project 4 / 블로그 설명 : 그리디 알고리즘, min-cut max-flow theorem
+- Project 3: 그래프 알고리즘, 다이나믹 프로그래밍 / 블로그 설명 / [Problems](/Computer_Algorithm/HW3.pdf) / [1](/Computer_Algorithm/project3_1.py) / [2](/Computer_Algorithm/project3_2.py) / [3](/Computer_Algorithm/project3_3.py) / [4](/Computer_Algorithm/project3_4.py) / [5](/Computer_Algorithm/project3_5.py)
+- Project 4: 그리디 알고리즘, min-cut max-flow theorem / 블로그 설명 / [Problems](/Computer_Algorithm/HW4.pdf) / [1](/Computer_Algorithm/project4_1.py) / [2](/Computer_Algorithm/project4_2.py) / [3](/Computer_Algorithm/project4_3.py) / [4](/Computer_Algorithm/project4_4.py) / [5](/Computer_Algorithm/project4_5.py)
 
 project 3, project 4 answer code is uploaded with problems
 
