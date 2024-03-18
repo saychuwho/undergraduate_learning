@@ -69,10 +69,10 @@ Make file compression program running on Raspberry Pi. Code is aimed to run on R
 
 네 개의 프로젝트가 있습니다. 모든 코드는 C++로 작성되었습니다. Ubuntu 20.04, g++ 9.4.0 환경에서 제작했습니다
 
-- [Project 1](/Computer_Architecture/project1/) / [블로그 설명](https://velog.io/@saychuwho/Project-1-%EA%B0%84%EB%8B%A8%ED%95%9C-MIPS-Assembler) : 간단한 MIPS 어셈블러
-- [Project 2](/Computer_Architecture/project2/) / [블로그 설명](https://velog.io/@saychuwho/Project-1-%EA%B0%84%EB%8B%A8%ED%95%9C-MIPS-Assembler) : MIPS Instruction Emulator
-- [Project 3](/Computer_Architecture/project3/) / 블로그 설명 : MIPS single pipeline CPU
-- [Project 4](/Computer_Architecture/project4/) / 블로그 설명 : L1, L2 Cache와 벤치마크
+- [Project 1](/Computer_Architecture/project1/) / [report](/Computer_Architecture/project1/project1_report.pdf) / [블로그 설명](https://velog.io/@saychuwho/Project-1-%EA%B0%84%EB%8B%A8%ED%95%9C-MIPS-Assembler) : 간단한 MIPS 어셈블러
+- [Project 2](/Computer_Architecture/project2/) / [report](/Computer_Architecture/project2/project2_report.pdf) / [블로그 설명](https://velog.io/@saychuwho/Project-1-%EA%B0%84%EB%8B%A8%ED%95%9C-MIPS-Assembler) : MIPS Instruction Emulator
+- [Project 3](/Computer_Architecture/project3/) / [report](/Computer_Architecture/project3/Project3_report.pdf) / 블로그 설명 : MIPS single pipeline CPU
+- [Project 4](/Computer_Architecture/project4/) / [report](/Computer_Architecture/project4/report_project4.pdf) / [report(English)](/Computer_Architecture/project4/report_project4_english.pdf) / 블로그 설명 : L1, L2 Cache와 벤치마크
 
 ---
 
@@ -105,9 +105,9 @@ There are four assignment. All codes written in C++, aimed to run on Ubuntu 20.0
   - 다음 명령어를 이용해 xv6를 부팅할 수 있습니다. `make clean; make qemu-nox -j`
   - 각 프로젝트를 구현한 branch가 다르니, `git checkout`을 이용해 각 프로젝트에 맞는 branch로 들어가야 합니다.
 
-- Project 1 / branch: miniprj-2023 / 블로그 설명 / [code](https://github.com/saychuwho/DGIST_OS_projects_xv6/tree/miniprj-2023) : CFS 스케쥴러와 프로세스 우선 순위 조정 system call / EEVDF 스케쥴러 (둘 다 linux 커널 2.6.23에 있는 [rbtree.c](https://github.com/torvalds/linux/blob/v2.6.23/lib/rbtree.c), [rbtree.h](https://github.com/torvalds/linux/blob/v2.6.23/include/linux/rbtree.h)가 필요하다.)
-- Project 2 / branch: inverted / 블로그 설명 / [code](https://github.com/saychuwho/DGIST_OS_projects_xv6/tree/inverted) : Inverted page table (모든 usertest를 통과하지는 못했지만, 부팅은 한다.)
-- Project 3 / branch: raid / 블로그 설명 / [code](https://github.com/saychuwho/DGIST_OS_projects_xv6/tree/raid) : RAID 5 (disk block cache 양이 많이 필요하다)
+- Project 1 / branch: miniprj-2023 / [report](/Operating_Systems/project1_report.pdf) / 블로그 설명 / [code](https://github.com/saychuwho/DGIST_OS_projects_xv6/tree/miniprj-2023) : CFS 스케쥴러와 프로세스 우선 순위 조정 system call / EEVDF 스케쥴러 (둘 다 linux 커널 2.6.23에 있는 [rbtree.c](https://github.com/torvalds/linux/blob/v2.6.23/lib/rbtree.c), [rbtree.h](https://github.com/torvalds/linux/blob/v2.6.23/include/linux/rbtree.h)가 필요하다.)
+- Project 2 / branch: inverted / [report](/Operating_Systems/project2_report.pdf) / 블로그 설명 / [code](https://github.com/saychuwho/DGIST_OS_projects_xv6/tree/inverted) : Inverted page table (모든 usertest를 통과하지는 못했지만, 부팅은 한다.)
+- Project 3 / branch: raid / [report](/Operating_Systems/project3_report.pdf) / 블로그 설명 / [code](https://github.com/saychuwho/DGIST_OS_projects_xv6/tree/raid) : RAID 5 (disk block cache 양이 많이 필요하다)
 
 ---
 
